@@ -42,13 +42,15 @@ public class UserEntity implements UserDetails {
     private LocalDateTime createdAt; // 회원가입 날짜 저장
     //다른 정보들 추가
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @ElementCollection(fetch=FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
     @Override

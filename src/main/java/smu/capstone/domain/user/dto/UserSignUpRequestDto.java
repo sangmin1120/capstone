@@ -40,6 +40,13 @@ public class UserSignUpRequestDto {
 
     @Builder
     public UserEntity toEntity() {
-        return UserEntity.builder().username(username).email(email).password(password).role(Role.ROLE_USER).createdAt(LocalDateTime.now()).userType(userType).build();
+        return UserEntity.builder().
+                username(username).
+                email(email).
+                password(password).
+                role(Role.ROLE_USER).
+                createdAt(LocalDateTime.now()).
+                userType(userType).
+                build();
     }
 }
