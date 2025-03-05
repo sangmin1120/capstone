@@ -20,13 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class UserSignUpRequestDto {
 
-    public UserSignUpRequestDto(String username, String email, String password, UserType userType) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.userType = userType;
-    }
-
     @NotBlank
     private String username;
     @Email
@@ -35,19 +28,18 @@ public class UserSignUpRequestDto {
     private String password;
     @Enumerated(EnumType.STRING)
     private UserType userType;
-
-//    private String checkedPassword;
+    //    private String checkedPassword;
     private Role role;
+
+    public UserSignUpRequestDto(String username, String email, String password, UserType userType) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.userType = userType;
+    }
 
     @Builder
     public UserEntity toEntity() {
-        return UserEntity.builder()
-                .username(username)
-                .email(email)
-                .password(password)
-                .role(Role.ROLE_USER)
-                .createdAt(LocalDateTime.now())
-                .userType(userType)
-                .build();
+        return UserEntity.builder().username(username).email(email).password(password).role(Role.ROLE_USER).createdAt(LocalDateTime.now()).userType(userType).build();
     }
 }

@@ -15,8 +15,6 @@ import smu.capstone.domain.user.respository.UserRepository;
 import smu.capstone.jwt.JwtToken;
 import smu.capstone.jwt.JwtTokenProvider;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,7 +32,7 @@ public class UserServiceImpl implements UserService {
     public void signUp(UserSignUpRequestDto requestDto) {
 
         Optional<UserEntity> foundMember = userRepository.findByEmail(requestDto.getEmail());
-        if(foundMember.isPresent()){
+        if (foundMember.isPresent()) {
             throw new IllegalArgumentException("이미 존재하는 회원 입니다.");
         }
         //password encode
@@ -50,13 +48,11 @@ public class UserServiceImpl implements UserService {
 
         //1. username(email) + password 기반 Authentication 객체 생성
         //authentication 은 인증 여부 확인하는 authenticated 값 false
-        UsernamePasswordAuthenticationToken authenticationToken = new
-                UsernamePasswordAuthenticationToken(requestDto.getEmail(), requestDto.getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(requestDto.getEmail(), requestDto.getPassword());
 
         //2. 실제 검증. authenticated() 메서드를 통해 요청된 User 대한 검증 진행
         //authenticate 메서드 실행시, CustomUserDetailsService 만든 loadUserByUsername 실행
-        Authentication authentication =
-                authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
         //3. 인증 정보 기반으로 JWT 토큰 생성
         return jwtTokenProvider.generateToken(authentication);
     }
