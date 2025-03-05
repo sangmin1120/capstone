@@ -18,6 +18,7 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
+application.properties //azure 보안문제 때문에
 .idea
 *.iws
 *.iml
