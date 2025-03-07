@@ -1,5 +1,6 @@
 package smu.capstone.jwt.filter;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import smu.capstone.jwt.util.JWTUtil;
 import smu.capstone.security.dto.CustomUserDetails;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Optional;
 
 @Slf4j
@@ -28,44 +30,60 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        //Authorization 헤더를 찾음
-        String authorization = request.getHeader("Authorization");
+       //헤더에서 access 토큰 꺼냄
+        String accessToken = request.getHeader("access");
 
-        //헤더 검증
-        if (authorization==null || !authorization.startsWith("Bearer ")) {
-
-            log.info("token null");
+        //access 검증
+        if (accessToken==null) {
             filterChain.doFilter(request, response);
             return;
         }
-        //토큰만 획득
-        String token = authorization.split(" ")[1];
-        //소멸 시간 검증
-        if (jwtUtil.isExpired(token)) {
 
-            log.info("token expired");
-            filterChain.doFilter(request, response);
+        //access 토큰이 있다. -> 만료 확인
+        try {
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException e) {
+            //response body
+            PrintWriter writer = response.getWriter();
+            writer.print("access token expired");
+
+            //response status
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-        //토큰에서 email, role 획득
-        String email = jwtUtil.getEmail(token);
-        String role = jwtUtil.getRole(token);
-        //마지막 검증? -- 이렇게 해도 되나?
+
+        //토큰이 access 인지 확인 (발급 시 payload 명시)
+        String category = jwtUtil.getCategory(accessToken);
+
+        if (!category.equals("access")) {
+            //response body
+            PrintWriter writer = response.getWriter();
+            writer.print("invalid access token");
+
+            //response status
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        }
+
+        //email, role 값을 획득
+        String email = jwtUtil.getEmail(accessToken);
+        String role = jwtUtil.getRole(accessToken);
+
         Optional<UserEntity> userEntity = userRepository.findByEmail(email);
         if (!userEntity.isPresent()) {
+            //response body
+            PrintWriter writer = response.getWriter();
+            writer.print("userRepository not found: userEntity invalid");
 
-            log.info("user null");
-            filterChain.doFilter(request, response);
+            //response status
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
-
-
-        //Entity 생성
+        //
         CustomUserDetails customUserDetails = new CustomUserDetails(userEntity.get());
-        //시큐리티 인증 토큰 생성
-        Authentication authToken =
+
+        UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities());
-        //세션에 사용자 등록
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);

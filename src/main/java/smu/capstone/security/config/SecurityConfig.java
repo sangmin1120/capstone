@@ -1,6 +1,5 @@
 package smu.capstone.security.config;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,14 +11,13 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.security.web.authentication.logout.LogoutFilter;
 import smu.capstone.domain.member.respository.UserRepository;
 import smu.capstone.jwt.filter.JWTFilter;
+import smu.capstone.jwt.repository.RefreshRepository;
 import smu.capstone.jwt.util.JWTUtil;
 import smu.capstone.security.filter.LoginFilter;
-
-import java.util.Collections;
+import smu.capstone.security.filter.CustomLogoutFiler;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +28,7 @@ public class SecurityConfig {
     private final JWTUtil jwtUtil;
 
     private final UserRepository userRepository;
+    private final RefreshRepository refreshRepository;
 
     //암호화
     @Bean
@@ -81,6 +80,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/login", "/", "/join","/error").permitAll()
                         .requestMatchers("/admin").hasRole("USER")
+                        .requestMatchers("/reissue").permitAll()
                         .anyRequest().authenticated());
 
         //filter 등록(JWTFilter)
@@ -89,8 +89,12 @@ public class SecurityConfig {
 
         //filter 등록(loginFilter)
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)
+                                , jwtUtil, refreshRepository)
                         , UsernamePasswordAuthenticationFilter.class);
+        //filter 등록(logoutFilter)
+        http
+                .addFilterBefore(new CustomLogoutFiler(jwtUtil, refreshRepository), LogoutFilter.class);
 
         //세션 설정
         http
