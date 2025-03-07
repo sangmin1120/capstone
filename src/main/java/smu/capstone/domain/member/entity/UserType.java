@@ -1,4 +1,4 @@
-package smu.capstone.domain.user.entity;
+package smu.capstone.domain.member.entity;
 
 public enum UserType {
     CAREGIVER, PATIENT

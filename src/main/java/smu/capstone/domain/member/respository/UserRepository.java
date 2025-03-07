@@ -1,7 +1,7 @@
-package smu.capstone.domain.user.respository;
+package smu.capstone.domain.member.respository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import smu.capstone.domain.user.entity.UserEntity;
+import smu.capstone.domain.member.entity.UserEntity;
 
 import java.util.Optional;
 

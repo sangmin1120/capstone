@@ -1,15 +1,19 @@
-package smu.capstone.domain.user.entity;
+package smu.capstone.domain.member.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import smu.capstone.domain.member.dto.SignUpDto;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,7 +27,7 @@ import java.util.stream.Collectors;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class UserEntity implements UserDetails {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,37 +44,16 @@ public class UserEntity implements UserDetails {
     private Role role;
 
     private LocalDateTime createdAt; // 회원가입 날짜 저장
+
+    public static UserEntity toEntity(SignUpDto requestDto) {
+        return UserEntity.builder()
+                .email(requestDto.getEmail())
+                .password(requestDto.getPassword())
+                .username(requestDto.getUsername())
+                .userType(requestDto.getUserType())
+                .role(Role.ROLE_USER)
+                .createdAt(LocalDateTime.now())
+                .build();
+    }
     //다른 정보들 추가
-
-    @ElementCollection(fetch=FetchType.EAGER)
-    @Builder.Default
-    private List<String> roles = new ArrayList<>();
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true;
-    }
-
 }
