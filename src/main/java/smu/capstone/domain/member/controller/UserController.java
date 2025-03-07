@@ -53,16 +53,5 @@ public class UserController {
         return "ok";
     }
 
-    @GetMapping("/")
-    public String mainp() {
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        return "UserController" + name;
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<String> handleValidationException(MethodArgumentNotValidException ex) {
-        log.error("🚨 Validation error: {}", ex.getMessage());
-        return ResponseEntity.badRequest().body("Invalid input data");
-    }
 }
