@@ -5,6 +5,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import smu.capstone.web.jwt.entity.RefreshEntity;
 import smu.capstone.web.jwt.repository.RefreshRepository;
@@ -18,6 +19,10 @@ public class ReissueService {
 
     private final JWTUtil jwtUtil;
     private final RefreshRepository refreshRepository;
+
+    @Value("${jwt.token.refresh-expire-length:7200000}") // 기본값 2시간 (7200000ms)
+    private long REFRESH_EXPIRE;
+
 
     public String reissueRefresh(HttpServletRequest request, HttpServletResponse response) {
         //get refresh token
@@ -59,12 +64,12 @@ public class ReissueService {
         String role = jwtUtil.getRole(refresh);
 
         //make new JWT
-        String newAccess = jwtUtil.createJwt("access", email, role, 600000L);
-        String newRefresh = jwtUtil.createJwt("refresh", email, role, 86400000L);
+        String newAccess = jwtUtil.createJwt("access", email, role);
+        String newRefresh = jwtUtil.createJwt("refresh", email, role);
 
         //refresh 토큰 저장 DB에 기존의 refresh 토큰 삭제 후 새 refresh 토큰 저장
         refreshRepository.deleteByRefresh(refresh);
-        addRefreshEntity(email, refresh, 86400000L);
+        addRefreshEntity(email, refresh, REFRESH_EXPIRE);
         
         //response
         response.setHeader("access", newAccess);

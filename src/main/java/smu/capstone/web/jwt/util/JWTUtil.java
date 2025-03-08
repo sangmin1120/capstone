@@ -15,6 +15,12 @@ public class JWTUtil {
 
     private SecretKey secretKey;
 
+    @Value("${jwt.token.access-expire-length:3600000}") // 기본값 1시간 (3600000ms)
+    private long ACCESS_EXPIRE;
+    @Value("${jwt.token.refresh-expire-length:7200000}") // 기본값 2시간 (7200000ms)
+    private long REFRESH_EXPIRE;
+
+
     public JWTUtil(@Value("${jwt.secret}") String secret) {
         this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
@@ -56,7 +62,9 @@ public class JWTUtil {
                 .before(new Date());
     }
 
-    public String createJwt(String category, String email, String role, Long expiredMs) {
+    public String createJwt(String category, String email, String role) {
+        Long expiredMs = category.equals("access") ? ACCESS_EXPIRE : REFRESH_EXPIRE;
+
         return Jwts.builder()
                 .claim("category", category)
                 .claim("email", email)
