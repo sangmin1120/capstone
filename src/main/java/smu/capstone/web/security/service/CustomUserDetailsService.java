@@ -1,13 +1,12 @@
-package smu.capstone.security.service;
+package smu.capstone.web.security.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.security.dto.CustomUserDetails;
+import smu.capstone.web.security.dto.CustomUserDetails;
 
 import java.util.Optional;
 

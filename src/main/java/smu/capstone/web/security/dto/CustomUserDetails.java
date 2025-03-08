@@ -1,4 +1,4 @@
-package smu.capstone.security.dto;
+package smu.capstone.web.security.dto;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

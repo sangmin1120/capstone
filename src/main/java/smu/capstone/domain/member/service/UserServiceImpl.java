@@ -23,6 +23,11 @@ public class UserServiceImpl implements UserService {
         return userRepository.existsByEmail(email);
     }
 
+    /**
+     * 검증 후 회원가입
+     * @param requestDto: DTO 형태
+     * @return: 성공하면 treu, 실패하면 false
+     */
     @Transactional
     @Override
     public Boolean join(SignUpDto requestDto) {
@@ -42,6 +47,10 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    /**
+     * 필터에서 로그인 검증 처리 - service 에서는?
+     * @param requestDto: DTO 형태
+     */
     @Transactional
     @Override
     public void login(SignInDto requestDto) {

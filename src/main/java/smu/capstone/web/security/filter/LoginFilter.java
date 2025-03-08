@@ -1,4 +1,4 @@
-package smu.capstone.security.filter;
+package smu.capstone.web.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
@@ -17,9 +17,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StreamUtils;
 import smu.capstone.domain.member.dto.SignInDto;
-import smu.capstone.jwt.entity.RefreshEntity;
-import smu.capstone.jwt.repository.RefreshRepository;
-import smu.capstone.jwt.util.JWTUtil;
+import smu.capstone.web.jwt.entity.RefreshEntity;
+import smu.capstone.web.jwt.repository.RefreshRepository;
+import smu.capstone.web.jwt.util.JWTUtil;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +27,12 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
 
+/**
+ * filter- json 형식으로 값을 가져와 확인
+ * @Exception 종류: RuntimeException(RequestBody Mapping 실패한 경우)
+ *                LogInFiled(로그인 실패 예외처리 만들기 line:123)
+ *
+ */
 @RequiredArgsConstructor
 @Slf4j
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -114,6 +120,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         log.info("LoginFilter unsuccessful authentication");
+        //로그인 실패 예외처리 만들기
 
         response.setStatus(401);
     }

@@ -1,4 +1,4 @@
-package smu.capstone.jwt.service;
+package smu.capstone.web.jwt.service;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.http.Cookie;
@@ -6,9 +6,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import smu.capstone.jwt.entity.RefreshEntity;
-import smu.capstone.jwt.repository.RefreshRepository;
-import smu.capstone.jwt.util.JWTUtil;
+import smu.capstone.web.jwt.entity.RefreshEntity;
+import smu.capstone.web.jwt.repository.RefreshRepository;
+import smu.capstone.web.jwt.util.JWTUtil;
 
 import java.util.Date;
 

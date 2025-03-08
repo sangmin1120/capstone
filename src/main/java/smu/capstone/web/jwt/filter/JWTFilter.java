@@ -1,4 +1,4 @@
-package smu.capstone.jwt.filter;
+package smu.capstone.web.jwt.filter;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -8,13 +8,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.jwt.util.JWTUtil;
-import smu.capstone.security.dto.CustomUserDetails;
+import smu.capstone.web.jwt.util.JWTUtil;
+import smu.capstone.web.security.dto.CustomUserDetails;
 
 import java.io.IOException;
 import java.io.PrintWriter;
