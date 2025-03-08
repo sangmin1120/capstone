@@ -1,4 +1,4 @@
-package smu.capstone.jwt.entity;
+package smu.capstone.web.jwt.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

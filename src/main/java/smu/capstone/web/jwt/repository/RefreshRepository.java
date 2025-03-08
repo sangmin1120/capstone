@@ -1,8 +1,8 @@
-package smu.capstone.jwt.repository;
+package smu.capstone.web.jwt.repository;
 
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
-import smu.capstone.jwt.entity.RefreshEntity;
+import smu.capstone.web.jwt.entity.RefreshEntity;
 
 public interface RefreshRepository extends JpaRepository<RefreshEntity, Long> {
 

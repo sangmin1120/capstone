@@ -1,4 +1,4 @@
-package smu.capstone.security.config;
+package smu.capstone.web.security.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,11 +13,11 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.jwt.filter.JWTFilter;
-import smu.capstone.jwt.repository.RefreshRepository;
-import smu.capstone.jwt.util.JWTUtil;
-import smu.capstone.security.filter.LoginFilter;
-import smu.capstone.security.filter.CustomLogoutFiler;
+import smu.capstone.web.jwt.filter.JWTFilter;
+import smu.capstone.web.jwt.repository.RefreshRepository;
+import smu.capstone.web.jwt.util.JWTUtil;
+import smu.capstone.web.security.filter.LoginFilter;
+import smu.capstone.web.security.filter.CustomLogoutFiler;
 
 @Configuration
 @EnableWebSecurity

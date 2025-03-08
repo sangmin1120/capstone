@@ -1,4 +1,4 @@
-package smu.capstone.security.filter;
+package smu.capstone.web.security.filter;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -10,11 +10,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.filter.GenericFilterBean;
-import smu.capstone.jwt.repository.RefreshRepository;
-import smu.capstone.jwt.util.JWTUtil;
+import smu.capstone.web.jwt.repository.RefreshRepository;
+import smu.capstone.web.jwt.util.JWTUtil;
 
 import java.io.IOException;
 
+/**
+ * filter- 로그아웃 -> repository 에서 refresh 삭제, cookie 값 없앤다.
+ * @Exception 종류: NotMatchRequestURI, NotMatchMethod, InvalidRefreshToken,
+ *                ExpiredRefreshToken, NotFoundRefreshToken
+ */
 @RequiredArgsConstructor
 public class CustomLogoutFiler extends GenericFilterBean {
 

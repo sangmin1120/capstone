@@ -1,4 +1,4 @@
-package smu.capstone.jwt.util;
+package smu.capstone.web.jwt.util;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Value;
