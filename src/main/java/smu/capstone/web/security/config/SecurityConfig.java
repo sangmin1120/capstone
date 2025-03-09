@@ -3,104 +3,48 @@ package smu.capstone.web.security.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
-import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.web.jwt.filter.JWTFilter;
-import smu.capstone.web.jwt.repository.RefreshRepository;
-import smu.capstone.web.jwt.util.JWTUtil;
-import smu.capstone.web.security.filter.LoginFilter;
-import smu.capstone.web.security.filter.CustomLogoutFiler;
+import smu.capstone.web.jwt.*;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final JWTUtil jwtUtil;
-
-    private final UserRepository userRepository;
-    private final RefreshRepository refreshRepository;
-
-    //암호화
-    @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    //AuthenticationManager
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
-        return configuration.getAuthenticationManager();
-    }
+    private final TokenProvider tokenProvider;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-
-        /*
-        //cors
         http
-                .cors((cors)->cors
-                        .configurationSource(new CorsConfigurationSource() {
-                            @Override
-                            public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
-                                CorsConfiguration config = new CorsConfiguration();
-                                config.setAllowCredentials(Collections.singletonList("http://localhost:3000"));
-                                config.setAllowedMethods(Collections.singletonList("*"));
-                                config.setAllowCredentials(true);
-                                config.setAllowedHeaders(Collections.singletonList("*"));
-                                config.setMaxAge(3600L);
-                                return null;
-                            }
-                        }));
-         */
+                .csrf(AbstractHttpConfigurer::disable)
 
-        //csrf disable
-        http
-                .csrf((auth) -> auth.disable());
+                .exceptionHandling(configurer -> {
+                    configurer.authenticationEntryPoint(jwtAuthenticationEntryPoint);
+                    configurer.accessDeniedHandler(jwtAccessDeniedHandler);
+                })
 
-        //From 로그인 방식 disable
-        http
-                .formLogin((auth) -> auth.disable());
+                .sessionManagement(configurer ->
+                        configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
 
-        //http basic 인증 방식 disable
-        http
-                .httpBasic((auth) -> auth.disable());
+                .formLogin(AbstractHttpConfigurer::disable)
 
-        //경로별 인가 작업
-        http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join","/error").permitAll()
-                        .requestMatchers("/admin").hasRole("USER")
-                        .requestMatchers("/reissue").permitAll()
-                        .anyRequest().authenticated());
-
-        //filter 등록(JWTFilter)
-        http
-                .addFilterBefore(new JWTFilter(jwtUtil, userRepository), LoginFilter.class);
-
-        //filter 등록(loginFilter)
-        http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration)
-                                , jwtUtil, refreshRepository)
-                        , UsernamePasswordAuthenticationFilter.class);
-        //filter 등록(logoutFilter)
-        http
-                .addFilterBefore(new CustomLogoutFiler(jwtUtil, refreshRepository), LogoutFilter.class);
-
-        //세션 설정
-        http
-                .sessionManagement((session) -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
+                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
