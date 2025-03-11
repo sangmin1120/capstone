@@ -4,9 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.respository.UserRepository;
+
+import static smu.capstone.common.errorcode.AuthExceptionCode.DUPLICATED_MAIL;
+import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_MAIL_OR_PASSWORD;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,11 @@ public class SignupService {
 
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
+
+        if (userRepository.existsByEmail(authRequestDto.getEmail())) {
+            throw new RestApiException(DUPLICATED_MAIL);
+        }
+
         UserEntity user = authRequestDto.toDto(passwordEncoder);
 
         userRepository.save(user);
