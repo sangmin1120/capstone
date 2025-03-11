@@ -37,6 +37,8 @@ public class LoginService {
     private final Environment env;
 
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
+
+
         UserEntity user = userRepository.findByEmail(authRequestDto.getEmail()).orElseThrow(() ->
                 new RestApiException(INVALID_MAIL_OR_PASSWORD));
 

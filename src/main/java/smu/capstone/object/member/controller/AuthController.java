@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,15 +18,14 @@ import smu.capstone.web.jwt.TokenService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
-@PreAuthorize("permitAll()")
+//@PreAuthorize("permitAll()")
 public class AuthController {
     private final SignupService signupService;
     private final LoginService loginService;
     private final TokenService tokenService;
 
-
     @PostMapping("/signup")
-    public BaseResponse<Void> signup(@RequestBody AuthRequestDto.SignUp authRequestDto){
+    public BaseResponse<Void> signup(@RequestBody AuthRequestDto.SignUp authRequestDto) {
         signupService.signup(authRequestDto);
         return BaseResponse.ok();
     }

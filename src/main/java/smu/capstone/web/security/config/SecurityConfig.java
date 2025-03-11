@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,27 +18,55 @@ import smu.capstone.web.jwt.*;
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
     private final TokenProvider tokenProvider;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
+    String[] NOT_AUTH_LIST = {"/api/user/login", "/api/user/signup",
+            "/api/user/refresh", "/api/user/delete-refresh-token"};
+
+    @Bean
+    public JwtFilter jwtFilter(TokenProvider tokenProvider) {
+        return new JwtFilter(tokenProvider);
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        //csrf disable
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf((auth) -> auth.disable());
 
-                .exceptionHandling(configurer -> {
-                    configurer.authenticationEntryPoint(jwtAuthenticationEntryPoint);
-                    configurer.accessDeniedHandler(jwtAccessDeniedHandler);
-                })
 
-                .sessionManagement(configurer ->
-                        configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                )
+        //Form 로그인 방식 disable
+        http
+                .formLogin((auth) -> auth.disable());
 
-                .formLogin(AbstractHttpConfigurer::disable)
+        //http basic 인증 방식 disable
+        http
+                .httpBasic((auth) -> auth.disable());
 
-                .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+        //경로별 인가 작업
+        //로그인이나 회원가입은 인가 x
+        //admin은 ADMIN만 가능
+        //다른 요청에 대해서는 로그인이 되어야만 가능
+        http
+                .authorizeHttpRequests((auth) -> auth
+                        .requestMatchers(NOT_AUTH_LIST).permitAll()
+                        .requestMatchers("/error/**").permitAll()
+                        .requestMatchers("/api-docs/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
+                        .requestMatchers("/swagger-ui/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
+                        .requestMatchers("/admin").hasRole("ADMIN")
+                        .anyRequest().authenticated());
+
+        //세션 설정
+        //JWT에서는 Session을 무상태성으로 관리
+        http
+                .sessionManagement((session) -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+
+        http
+                .addFilterBefore(jwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
