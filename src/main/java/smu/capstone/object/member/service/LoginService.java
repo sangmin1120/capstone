@@ -21,7 +21,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
-import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_MAIL_OR_PASSWORD;
+import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASSWORD;
 import static smu.capstone.web.jwt.TokenType.ACCESS_TOKEN;
 import static smu.capstone.web.jwt.TokenType.REFRESH_TOKEN;
 
@@ -39,18 +39,19 @@ public class LoginService {
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
 
 
-        UserEntity user = userRepository.findByEmail(authRequestDto.getEmail()).orElseThrow(() ->
-                new RestApiException(INVALID_MAIL_OR_PASSWORD));
+        String userid = authRequestDto.getUserid();
+        UserEntity user = userRepository.findByUserid(userid).orElseThrow(() ->
+                new RestApiException(INVALID_ID_OR_PASSWORD));
 
         if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
-            throw new RestApiException(INVALID_MAIL_OR_PASSWORD);
+            throw new RestApiException(INVALID_ID_OR_PASSWORD);
         }
 
-        String accessToken = tokenProvider.createToken(ACCESS_TOKEN, user.getId(), user.getAuthority().name());
+        String accessToken = tokenProvider.createToken(ACCESS_TOKEN, user.getId(), userid, user.getAuthority().name());
         Authentication authentication = tokenProvider.createAuthenticationByAccessToken(accessToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String refreshToken = tokenProvider.createToken(REFRESH_TOKEN, user.getId(), user.getAuthority().name());
+        String refreshToken = tokenProvider.createToken(REFRESH_TOKEN, user.getId(), userid, user.getAuthority().name());
         saveRefreshToken(refreshToken);
         setRefreshTokenCookie(response, refreshToken);
 

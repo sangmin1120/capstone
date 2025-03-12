@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
  */
 @Entity()
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,6 +26,8 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @Column(nullable = false, unique = true)
+    String userid;
     @Column(unique = true)
     String email;
     String password;

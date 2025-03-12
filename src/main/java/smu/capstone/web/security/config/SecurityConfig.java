@@ -23,9 +23,6 @@ public class SecurityConfig {
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
-    String[] NOT_AUTH_LIST = {"/api/user/login", "/api/user/signup",
-            "/api/user/refresh", "/api/user/delete-refresh-token"};
-
     @Bean
     public JwtFilter jwtFilter(TokenProvider tokenProvider) {
         return new JwtFilter(tokenProvider);
@@ -52,10 +49,8 @@ public class SecurityConfig {
         //다른 요청에 대해서는 로그인이 되어야만 가능
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers(NOT_AUTH_LIST).permitAll()
+                        .requestMatchers("/api/user-auth/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
-                        .requestMatchers("/api-docs/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
-                        .requestMatchers("/swagger-ui/**").permitAll() // '/api/user/'로 시작하는 요청 모두 접근 허가
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());
 

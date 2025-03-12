@@ -1,6 +1,5 @@
 package smu.capstone.object.member.dto;
 
-import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,8 +22,7 @@ public class AuthRequestDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Login {
-        @Email
-        String email;
+        String userid;
         String password;
     }
 
@@ -34,7 +32,7 @@ public class AuthRequestDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SignUp {
-        @Email
+        String userid;
         String email;
         String password;
         String username;
@@ -42,6 +40,7 @@ public class AuthRequestDto {
 
         public UserEntity toDto(PasswordEncoder passwordEncoder) {
             return UserEntity.builder()
+                    .userid(userid)
                     .email(email)
                     .password(passwordEncoder.encode(password))
                     .username(username)
@@ -50,5 +49,12 @@ public class AuthRequestDto {
                     .createdAt(LocalDateTime.now())
                     .build();
         }
+    }
+
+    @Getter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class Modify {
+
+        String newPassword;
     }
 }
