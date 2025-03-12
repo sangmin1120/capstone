@@ -19,11 +19,13 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            String token = tokenProvider.getAccessToken(request);
+            String accessToken = tokenProvider.getAccessToken(request);
+            String refreshToken = tokenProvider.getRefreshToken(request);
 
-            tokenProvider.validateToken(TokenType.ACCESS_TOKEN, token);
+            tokenProvider.validateToken(TokenType.ACCESS_TOKEN, accessToken);
+            tokenProvider.validateToken(TokenType.REFRESH_TOKEN, refreshToken);
 
-            Authentication authentication = tokenProvider.createAuthenticationByAccessToken(token);
+            Authentication authentication = tokenProvider.createAuthenticationByAccessToken(accessToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         catch (RestApiException ignored) {

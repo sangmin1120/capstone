@@ -16,6 +16,7 @@ import static smu.capstone.common.errorcode.AuthExceptionCode.REFRESH_TOKEN_NOT_
 @RequiredArgsConstructor
 @Slf4j
 public class TokenService {
+    private static final String PAYLOAD_VALUE = "userid";
     private final RefreshTokenCacheRepository refreshTokenCacheRepository;
     private final TokenProvider tokenProvider;
 
@@ -36,5 +37,10 @@ public class TokenService {
                 .orElseThrow(() -> new RestApiException(REFRESH_TOKEN_NOT_EXIST));
         log.info("refreshToken={}", refreshTokenCache.getRefreshToken());
         refreshTokenCacheRepository.delete(refreshTokenCache);
+    }
+
+    public String getUserid(String token) {
+        return tokenProvider.parseTokenClaims(TokenType.ACCESS_TOKEN, token)
+                .get(PAYLOAD_VALUE, String.class);
     }
 }

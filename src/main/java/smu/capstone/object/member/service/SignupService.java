@@ -9,8 +9,7 @@ import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.respository.UserRepository;
 
-import static smu.capstone.common.errorcode.AuthExceptionCode.DUPLICATED_MAIL;
-import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_MAIL_OR_PASSWORD;
+import static smu.capstone.common.errorcode.AuthExceptionCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -25,8 +24,8 @@ public class SignupService {
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
 
-        if (userRepository.existsByEmail(authRequestDto.getEmail())) {
-            throw new RestApiException(DUPLICATED_MAIL);
+        if (userRepository.existsByUserid(authRequestDto.getUserid())) {
+            throw new RestApiException(DUPLICATED_ID);
         }
 
         UserEntity user = authRequestDto.toDto(passwordEncoder);

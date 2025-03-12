@@ -38,6 +38,7 @@ import static smu.capstone.web.jwt.TokenType.REFRESH_TOKEN;
 public class TokenProvider {
     private static final String TOKEN_TYPE = "Bearer";
     private static final String AUTHORITY_KEY = "auth";
+    private static final String PAYLOAD_VALUE = "userid";
 
     @Value("${JWT_ACCESS_TOKEN_SECRET_KEY}")
     private String accessTokenSecretKey;
@@ -56,17 +57,19 @@ public class TokenProvider {
     public String createAccessTokenByRefreshToken(String refreshToken) {
         Claims claims = parseTokenClaims(REFRESH_TOKEN, refreshToken);
         String userId = claims.getSubject();
+        String userid = claims.get(PAYLOAD_VALUE, String.class);
         String authority = claims.get(AUTHORITY_KEY).toString();
-        return createToken(REFRESH_TOKEN, Long.parseLong(userId), authority);
+        return createToken(REFRESH_TOKEN, Long.parseLong(userId), userid, authority);
     }
 
-    public String createToken(TokenType tokenType, Long userId, String authority) {
+    public String createToken(TokenType tokenType, Long userId, String userid, String authority) {
         long nowMillisecond = new Date().getTime();
 
         return Jwts.builder()
-                .setIssuer("poodle")
+                .setIssuer("poodle")  //수정해야됨
                 .setSubject(userId.toString())
                 .setExpiration(new Date(nowMillisecond + tokenType.getValidMillisecond()))
+                .claim(PAYLOAD_VALUE, userid)
                 .claim(AUTHORITY_KEY, authority)
                 .signWith(getKey(tokenType), SignatureAlgorithm.HS256)
                 .compact();
@@ -93,7 +96,7 @@ public class TokenProvider {
         parseTokenClaims(tokenType, token);
     }
 
-    private Claims parseTokenClaims(TokenType tokenType, String token) {
+    public Claims parseTokenClaims(TokenType tokenType, String token) {
         return parseClaims(token, getKey(tokenType));
     }
 
