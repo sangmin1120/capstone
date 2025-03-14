@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.respository.UserRepository;
@@ -16,13 +17,14 @@ import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASS
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class InfoModifyService {
+public class InfoService {
 
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void modifyPassword(HttpServletRequest request, AuthRequestDto.Modify modifyDto) {
 
         //1. 검증 + userid 가져오기
