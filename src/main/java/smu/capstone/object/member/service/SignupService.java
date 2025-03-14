@@ -28,6 +28,10 @@ public class SignupService {
             throw new RestApiException(DUPLICATED_ID);
         }
 
+        if (authRequestDto.getPassword() != authRequestDto.getCheck_password()) {
+            throw new RestApiException(NOT_EQUAL_PASSWORD);
+        }
+
         UserEntity user = authRequestDto.toDto(passwordEncoder);
 
         userRepository.save(user);

@@ -49,7 +49,7 @@ public class SecurityConfig {
         //다른 요청에 대해서는 로그인이 되어야만 가능
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/user-auth/**").permitAll()
+                        .requestMatchers("/api/user-auth/**", "/api/user-search/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .anyRequest().authenticated());

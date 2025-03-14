@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.dto.TokenResponseDto;
@@ -36,6 +37,7 @@ public class LoginService {
     private final PasswordEncoder passwordEncoder;
     private final Environment env;
 
+    @Transactional
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
 
 

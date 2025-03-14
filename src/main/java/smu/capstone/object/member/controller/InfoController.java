@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import smu.capstone.common.response.BaseResponse;
 import smu.capstone.object.member.dto.AuthRequestDto;
-import smu.capstone.object.member.service.InfoModifyService;
+import smu.capstone.object.member.service.InfoService;
 
 @RestController
 @RequestMapping("/api/user/info")
 @RequiredArgsConstructor
 @Slf4j
-public class InfoModifyController {
+public class InfoController {
 
-    private final InfoModifyService infoModifyService;
+    private final InfoService infoService;
 
     // 비밀번호 변경
     @PostMapping("/password-modify")
     public BaseResponse<Void> modifyPassword(HttpServletRequest request, @RequestBody AuthRequestDto.Modify modifyDto) {
         log.info("Modify password");
-        infoModifyService.modifyPassword(request, modifyDto);
+        infoService.modifyPassword(request, modifyDto);
 
         return BaseResponse.ok();
     }

@@ -35,6 +35,7 @@ public class AuthRequestDto {
         String userid;
         String email;
         String password;
+        String check_password;
         String username;
         UserType userType;
 
