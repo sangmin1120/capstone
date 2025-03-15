@@ -1,5 +1,6 @@
 package smu.capstone.object.member.dto;
 
+import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +15,6 @@ import smu.capstone.object.member.domain.UserType;
 import java.time.LocalDateTime;
 
 public class AuthRequestDto {
-
 
     @Getter
     @NoArgsConstructor
@@ -36,6 +36,7 @@ public class AuthRequestDto {
         String email;
         String password;
         String check_password;
+        String certificationKey;
         String username;
         UserType userType;
 
@@ -57,5 +58,16 @@ public class AuthRequestDto {
     public static class Modify {
 
         String newPassword;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class VerificationMail {
+        @Email
+        String email;
+        String verificationKey;
     }
 }
