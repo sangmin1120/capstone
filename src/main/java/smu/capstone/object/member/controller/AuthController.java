@@ -44,4 +44,19 @@ public class AuthController {
         tokenService.deleteRefreshToken(request);
         return BaseResponse.ok();
     }
+
+    //메일 인증 전송
+    @PostMapping("send-verification-amil")
+    public BaseResponse<Void> sendVerificationMail(@RequestBody @Valid AuthRequestDto.VerificationMail authRequestDto) {
+        signupService.sendverificationMail(authRequestDto);
+
+        return BaseResponse.ok();
+    }
+    //인증 확인
+    @PostMapping("/verification-mail")
+    public BaseResponse<Void> verifyMail(@RequestBody @Valid AuthRequestDto.VerificationMail authRequestDto) {
+        signupService.verifyMail(authRequestDto);
+
+        return BaseResponse.ok();
+    }
 }
