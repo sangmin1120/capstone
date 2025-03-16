@@ -46,9 +46,9 @@ public class AuthController {
     }
 
     //메일 인증 전송
-    @PostMapping("send-verification-amil")
+    @PostMapping("/send-verification-mail")
     public BaseResponse<Void> sendVerificationMail(@RequestBody @Valid AuthRequestDto.VerificationMail authRequestDto) {
-        signupService.sendverificationMail(authRequestDto);
+        signupService.sendVerificationMail(authRequestDto);
 
         return BaseResponse.ok();
     }

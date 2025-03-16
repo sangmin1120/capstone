@@ -2,6 +2,7 @@ package smu.capstone.object.member.service;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import static smu.capstone.common.errorcode.AuthExceptionCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class SignupService {
 
     private static final Long CERTIFICATION_KEY_EXPIRE_SECONDS = 10 * 60L;
@@ -29,9 +31,12 @@ public class SignupService {
 
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
+        if (userRepository.existsByUserid(authRequestDto.getUserid())) {
+            throw new RestApiException(DUPLICATED_ID);
+        }
 
         MailVerificationCache mailVerificationCache = mailVerificationCacheRepository.findById(authRequestDto.getEmail())
-                .orElseThrow(() -> new RestApiException(NOT_VERIFIED_MAIL));
+                .orElseThrow(() -> new RestApiException(AUTHORIZATION_REQUIRED));
 
         if (!mailVerificationCache.getVerificationKey().equals(authRequestDto.getCertificationKey()) ||
             !mailVerificationCache.getIsVerify()) {
