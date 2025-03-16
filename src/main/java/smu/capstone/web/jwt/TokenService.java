@@ -32,10 +32,10 @@ public class TokenService {
 
     public void deleteRefreshToken(HttpServletRequest request) {
         String refreshToken = tokenProvider.getRefreshToken(request);
-        log.info("refreshToken={}", refreshToken);
+//        log.info("refreshToken={}", refreshToken);
         RefreshTokenCache refreshTokenCache = refreshTokenCacheRepository.findById(refreshToken)
                 .orElseThrow(() -> new RestApiException(REFRESH_TOKEN_NOT_EXIST));
-        log.info("refreshToken={}", refreshTokenCache.getRefreshToken());
+//        log.info("refreshToken={}", refreshTokenCache.getRefreshToken());
         refreshTokenCacheRepository.delete(refreshTokenCache);
     }
 
