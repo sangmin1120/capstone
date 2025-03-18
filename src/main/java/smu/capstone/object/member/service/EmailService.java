@@ -3,7 +3,6 @@ package smu.capstone.object.member.service;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -39,7 +38,7 @@ public class EmailService {
         SecureRandom secureRandom = new SecureRandom();
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        for (int i=0; i<6; i++) {
+        for (int i = 0; i < 6; i++) {
             int index = secureRandom.nextInt(characters.length());
             char randomChar = characters.charAt(index);
             key.append(randomChar);
@@ -54,7 +53,7 @@ public class EmailService {
         try {
             mimeMessage.setSubject("이메일 인증 코드입니다");
 
-            String msg="";
+            String msg = "";
             msg += "<h1 style=\"font-size: 30px; padding-right: 30px; padding-left: 30px;\">이메일 주소 확인</h1>";
             msg += "<p style=\"font-size: 17px; padding-right: 30px; padding-left: 30px;\">아래 확인 코드를 회원가입 화면에서 입력해주세요.</p>";
             msg += "<div style=\"padding-right: 30px; padding-left: 30px; margin: 32px 0 40px;\"><table style=\"border-collapse: collapse; border: 0; background-color: #F4F4F4; height: 70px; table-layout: fixed; word-wrap: break-word; border-radius: 6px;\"><tbody><tr><td style=\"text-align: center; vertical-align: middle; font-size: 30px;\">";
@@ -71,7 +70,7 @@ public class EmailService {
     private void sendMail(MimeMessage mimeMessage, String targetEmail) {
         try {
             mimeMessage.addRecipients(MimeMessage.RecipientType.TO, targetEmail);
-            mimeMessage.setFrom(new InternetAddress(username, "test"));
+            mimeMessage.setFrom(new InternetAddress(username, "RehaLink"));
 
             javaMailSender.send(mimeMessage);
         } catch (MessagingException | UnsupportedEncodingException e) {
