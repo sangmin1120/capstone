@@ -12,7 +12,7 @@ import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.service.InfoService;
 
 @RestController
-@RequestMapping("/api/user/info")
+@RequestMapping("/api/user-info")
 @RequiredArgsConstructor
 @Slf4j
 public class InfoController {
