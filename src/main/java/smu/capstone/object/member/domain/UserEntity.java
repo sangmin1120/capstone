@@ -4,6 +4,7 @@ package smu.capstone.object.member.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import smu.capstone.object.common.BaseEntity;
 
 import java.time.LocalDateTime;
 
@@ -20,7 +21,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Table(name = "users")
-public class UserEntity {
+public class UserEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,14 +33,13 @@ public class UserEntity {
     String email;
     String password;
     String username;
+    String imgUrl;
 
     @Enumerated(EnumType.STRING)
     UserType userType; // enum 으로 변경 ( 환자/간병인 )
 
     @Enumerated(EnumType.STRING)
     Authority authority;
-
-    LocalDateTime createdAt; // 회원가입 날짜 저장
 
     //다른 정보들 추가
 }

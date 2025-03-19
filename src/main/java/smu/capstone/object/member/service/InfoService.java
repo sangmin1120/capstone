@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.respository.UserRepository;
 import smu.capstone.web.jwt.TokenProvider;
@@ -38,5 +39,12 @@ public class InfoService {
         }, () -> {
             throw new RestApiException(INVALID_ID_OR_PASSWORD);
         });
+    }
+
+    public UserEntity getCurrentUser(HttpServletRequest request) {
+        String accessToken = tokenProvider.getAccessToken(request);
+        String userid = tokenService.getUserid(accessToken);
+        UserEntity userEntity = userRepository.findByUserid(userid).orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
+        return userEntity;
     }
 }
