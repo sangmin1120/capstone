@@ -48,7 +48,6 @@ public class AuthRequestDto {
                     .username(username)
                     .userType(userType)
                     .authority(Authority.ROLE_USER)
-                    .createdAt(LocalDateTime.now())
                     .build();
         }
     }
