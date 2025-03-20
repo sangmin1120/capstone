@@ -14,8 +14,9 @@ public enum CommonStatusCode implements StatusCode{
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "C401", "사용자 인증에 실패하였습니다."),
     FORBIDDEN(HttpStatus.FORBIDDEN, "C403", "권한이 없습니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "C404", "리소스가 존재하지 않습니다."),
-    NOT_FOUND_BOARD_TYPE(HttpStatus.NOT_ACCEPTABLE,"C404-1","BoardType 존재하지 않습니다."),
-    NOT_FOUND_BOARD_ID(HttpStatus.NOT_ACCEPTABLE,"C404-2","BoardId 존재하지 않습니다."),
+    NOT_FOUND_BOARD_TYPE(HttpStatus.NOT_FOUND,"C404-1","BoardType 존재하지 않습니다."),
+    NOT_FOUND_BOARD_ID(HttpStatus.NOT_FOUND,"C404-2","BoardId 존재하지 않습니다."),
+    NOT_FOUND_USER(HttpStatus.NOT_FOUND, "C404-3","사용자가 존재하지 않습니다."),
     VALIDATION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "C422-1", "유효성 검증에 실패하였습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C500-1", "서버 내부 에러입니다."),
     ;

@@ -3,6 +3,7 @@ package smu.capstone.object.comment.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.board.domain.Board;
 import smu.capstone.object.board.repository.BoardRepository;
 import smu.capstone.object.comment.domain.Comment;
@@ -14,6 +15,8 @@ import smu.capstone.object.member.respository.UserRepository;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static smu.capstone.common.errorcode.CommonStatusCode.*;
 
 @Service
 @RequiredArgsConstructor
@@ -27,9 +30,9 @@ public class CommentService {
     @Transactional
     public CommentResponseDto addComment(Long boardId, Long userId, CommentRequestDto requestDto) {
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
         UserEntity user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_USER));
 
         Comment comment = Comment.builder()
                 .content(requestDto.getContent())
@@ -53,10 +56,10 @@ public class CommentService {
     @Transactional
     public void deleteComment(Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND));
 
         if (!comment.getUser().getId().equals(userId)) {
-            throw new SecurityException("댓글 삭제 권한이 없습니다.");
+            throw new RestApiException(FORBIDDEN);
         }
 
         commentRepository.delete(comment);
