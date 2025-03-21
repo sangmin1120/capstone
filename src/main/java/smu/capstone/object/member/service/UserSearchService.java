@@ -18,7 +18,7 @@ public class UserSearchService {
     public String searchId(UserSearchDto.SearchIdRequest searchIdRequest) {
 
         return userRepository.findByEmail(searchIdRequest.getEmail())
-                .map(UserEntity::getUserid)
+                .map(UserEntity::getAccountId)
                 .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
     }
 }

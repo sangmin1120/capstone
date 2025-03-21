@@ -1,4 +1,4 @@
-package smu.capstone.object.exerciseDiary;
+package smu.capstone.object.exerciseDiary.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

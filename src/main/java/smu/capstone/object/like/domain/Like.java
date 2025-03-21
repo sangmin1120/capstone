@@ -1,4 +1,4 @@
-package smu.capstone.object.like;
+package smu.capstone.object.like.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

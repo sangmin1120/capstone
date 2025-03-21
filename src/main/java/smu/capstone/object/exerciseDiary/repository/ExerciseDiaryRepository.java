@@ -1,7 +1,8 @@
-package smu.capstone.object.exerciseDiary;
+package smu.capstone.object.exerciseDiary.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import smu.capstone.object.exerciseDiary.domain.ExerciseDiary;
 import smu.capstone.object.member.domain.UserEntity;
 
 import java.util.List;

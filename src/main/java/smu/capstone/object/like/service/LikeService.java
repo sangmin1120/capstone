@@ -1,23 +1,27 @@
-package smu.capstone.object.like;
+package smu.capstone.object.like.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.board.domain.Board;
 import smu.capstone.object.board.repository.BoardRepository;
+import smu.capstone.object.like.domain.Like;
+import smu.capstone.object.like.repository.LikeRepository;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.service.InfoService;
 
 
 import java.util.Optional;
 
+import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_BOARD_ID;
+
 @Service
 @RequiredArgsConstructor
 public class LikeService {
     private final LikeRepository likeRepository;
     private final BoardRepository boardRepository;
-   // private final UserRepository userRepository;
     private final InfoService infoService;
 
 
@@ -25,9 +29,7 @@ public class LikeService {
     public String likeBoard(Long boardId, HttpServletRequest request) {
         //  게시글 및 사용자 찾기
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
         UserEntity user = infoService.getCurrentUser(request);
 
         // 사용자가 이미 좋아요를 눌렀는지 확인
@@ -51,9 +53,7 @@ public class LikeService {
     public String unlikeBoard(Long boardId, HttpServletRequest request) {
         // 게시글 및 사용자 찾기
         Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
-//        User user = userRepository.findById(userId)
-//                .orElseThrow(() -> new IllegalArgumentException("사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
         UserEntity user = infoService.getCurrentUser(request);
 
         // 좋아요 존재 여부 확인 후 삭제

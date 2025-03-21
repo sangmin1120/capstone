@@ -38,7 +38,7 @@ import static smu.capstone.web.jwt.TokenType.REFRESH_TOKEN;
 public class TokenProvider {
     private static final String TOKEN_TYPE = "Bearer";
     private static final String AUTHORITY_KEY = "auth";
-    private static final String PAYLOAD_VALUE = "userid";
+    private static final String PAYLOAD_VALUE = "accountId";
 
     @Value("${JWT_ACCESS_TOKEN_SECRET_KEY}")
     private String accessTokenSecretKey;

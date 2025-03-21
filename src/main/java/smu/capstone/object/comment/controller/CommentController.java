@@ -2,7 +2,6 @@ package smu.capstone.object.comment.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import smu.capstone.common.response.BaseResponse;
 import smu.capstone.object.comment.dto.CommentRequestDto;

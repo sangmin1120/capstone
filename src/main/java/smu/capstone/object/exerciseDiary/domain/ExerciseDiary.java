@@ -1,9 +1,10 @@
-package smu.capstone.object.exerciseDiary;
+package smu.capstone.object.exerciseDiary.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import smu.capstone.object.common.BaseEntity;
 import smu.capstone.object.member.domain.UserEntity;
 
 import java.time.LocalDateTime;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ExerciseDiary {
+public class ExerciseDiary extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,12 +32,5 @@ public class ExerciseDiary {
 
     @Column(nullable = true)
     private Double distance; // 이동 거리 (단위: km) - 지도 API 사용 예정
-
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdAt; // 생성일
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt; // 수정일
 
 }

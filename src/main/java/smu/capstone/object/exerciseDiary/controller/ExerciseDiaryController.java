@@ -1,9 +1,12 @@
-package smu.capstone.object.exerciseDiary;
+package smu.capstone.object.exerciseDiary.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import smu.capstone.common.response.BaseResponse;
+import smu.capstone.object.exerciseDiary.dto.ExerciseDiaryRequestDto;
+import smu.capstone.object.exerciseDiary.dto.ExerciseDiaryResponseDto;
+import smu.capstone.object.exerciseDiary.service.ExerciseDiaryService;
 
 import java.util.List;
 
@@ -15,32 +18,32 @@ public class ExerciseDiaryController {
     private final ExerciseDiaryService exerciseDiaryService;
 
     @PostMapping
-    public ResponseEntity<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto requestDto, HttpServletRequest request) {
+    public BaseResponse<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto requestDto, HttpServletRequest request) {
         ExerciseDiaryResponseDto response = exerciseDiaryService.createExerciseDiary(requestDto, request);
-        return ResponseEntity.ok(response);
+        return BaseResponse.ok(response);
     }
 
     // 사용자의 모든 운동 기록 조회
     @GetMapping
-    public ResponseEntity<List<ExerciseDiaryResponseDto>> getUserDiaries(HttpServletRequest request) {
+    public BaseResponse<List<ExerciseDiaryResponseDto>> getUserDiaries(HttpServletRequest request) {
         List<ExerciseDiaryResponseDto> diaries = exerciseDiaryService.getUserDiaries(request);
-        return ResponseEntity.ok(diaries);
+        return BaseResponse.ok(diaries);
     }
 
     // 운동 기록 수정
     @PutMapping("/{diaryId}")
-    public ResponseEntity<ExerciseDiaryResponseDto> updateDiary(
+    public BaseResponse<ExerciseDiaryResponseDto> updateDiary(
             @PathVariable("diaryId") Long diaryId,
             @RequestBody ExerciseDiaryRequestDto requestDto, HttpServletRequest request) {
         ExerciseDiaryResponseDto updatedDiary = exerciseDiaryService.updateDiary(diaryId, requestDto, request);
-        return ResponseEntity.ok(updatedDiary);
+        return BaseResponse.ok(updatedDiary);
     }
 
     // 운동 기록 삭제
     @DeleteMapping("/{diaryId}")
-    public ResponseEntity<String> deleteDiary(@PathVariable Long diaryId, HttpServletRequest request) {
+    public BaseResponse<String> deleteDiary(@PathVariable("diaryId") Long diaryId, HttpServletRequest request) {
         exerciseDiaryService.deleteDiary(diaryId, request);
-        return ResponseEntity.ok("운동 기록이 삭제되었습니다.");
+        return BaseResponse.ok("운동 기록이 삭제되었습니다.");
     }
 }
 

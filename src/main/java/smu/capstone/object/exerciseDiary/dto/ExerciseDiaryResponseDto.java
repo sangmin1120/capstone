@@ -1,6 +1,7 @@
-package smu.capstone.object.exerciseDiary;
+package smu.capstone.object.exerciseDiary.dto;
 
 import lombok.Getter;
+import smu.capstone.object.exerciseDiary.domain.ExerciseDiary;
 
 import java.time.LocalDateTime;
 
