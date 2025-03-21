@@ -1,14 +1,22 @@
-package smu.capstone.object.exerciseDiary;
+package smu.capstone.object.exerciseDiary.service;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import smu.capstone.common.exception.RestApiException;
+import smu.capstone.object.exerciseDiary.domain.ExerciseDiary;
+import smu.capstone.object.exerciseDiary.repository.ExerciseDiaryRepository;
+import smu.capstone.object.exerciseDiary.dto.ExerciseDiaryRequestDto;
+import smu.capstone.object.exerciseDiary.dto.ExerciseDiaryResponseDto;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.service.InfoService;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static smu.capstone.common.errorcode.CommonStatusCode.FORBIDDEN;
+import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_EXERCISE_DIARY;
 
 @Service
 @RequiredArgsConstructor
@@ -44,11 +52,11 @@ public class ExerciseDiaryService {
         UserEntity currentUser = infoService.getCurrentUser(request);
 
         ExerciseDiary diary = exerciseDiaryRepository.findById(diaryId)
-                .orElseThrow(() -> new IllegalArgumentException("운동 기록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_EXERCISE_DIARY));
 
         // 본인만 수정 가능하도록 체크
         if (!diary.getUser().equals(currentUser)) {
-            throw new SecurityException("해당 운동 기록을 수정할 권한이 없습니다.");
+            throw new RestApiException(FORBIDDEN);
         }
 
         diary.setContent(requestDto.getContent());
@@ -63,11 +71,11 @@ public class ExerciseDiaryService {
         UserEntity currentUser = infoService.getCurrentUser(request);
 
         ExerciseDiary diary = exerciseDiaryRepository.findById(diaryId)
-                .orElseThrow(() -> new IllegalArgumentException("운동 기록을 찾을 수 없습니다."));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_EXERCISE_DIARY));
 
         //  본인만 삭제 가능하도록 체크
         if (!diary.getUser().equals(currentUser)) {
-            throw new SecurityException("해당 운동 기록을 삭제할 권한이 없습니다.");
+            throw new RestApiException(FORBIDDEN);
         }
 
         exerciseDiaryRepository.delete(diary);

@@ -6,8 +6,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import smu.capstone.object.common.BaseEntity;
 
-import java.time.LocalDateTime;
-
 
 /**
  * 기본적인 회원 정보
@@ -28,7 +26,7 @@ public class UserEntity extends BaseEntity {
     Long id;
 
     @Column(nullable = false, unique = true)
-    String userid;
+    String accountId;
     @Column(unique = true)
     String email;
     String password;

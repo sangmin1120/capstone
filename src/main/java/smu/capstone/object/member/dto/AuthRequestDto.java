@@ -12,8 +12,6 @@ import smu.capstone.object.member.domain.Authority;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.domain.UserType;
 
-import java.time.LocalDateTime;
-
 public class AuthRequestDto {
 
     @Getter
@@ -22,7 +20,7 @@ public class AuthRequestDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Login {
-        String userid;
+        String accountId;
         String password;
     }
 
@@ -32,7 +30,7 @@ public class AuthRequestDto {
     @Builder
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class SignUp {
-        String userid;
+        String accountId;
         String email;
         String password;
         String check_password;
@@ -42,7 +40,7 @@ public class AuthRequestDto {
 
         public UserEntity toDto(PasswordEncoder passwordEncoder) {
             return UserEntity.builder()
-                    .userid(userid)
+                    .accountId(accountId)
                     .email(email)
                     .password(passwordEncoder.encode(password))
                     .username(username)

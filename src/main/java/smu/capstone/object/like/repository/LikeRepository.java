@@ -1,7 +1,8 @@
-package smu.capstone.object.like;
+package smu.capstone.object.like.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import smu.capstone.object.board.domain.Board;
+import smu.capstone.object.like.domain.Like;
 import smu.capstone.object.member.domain.UserEntity;
 
 import java.util.Optional;

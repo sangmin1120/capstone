@@ -41,8 +41,8 @@ public class LoginService {
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
 
 
-        String userid = authRequestDto.getUserid();
-        UserEntity user = userRepository.findByUserid(userid).orElseThrow(() ->
+        String userid = authRequestDto.getAccountId();
+        UserEntity user = userRepository.findByAccountId(userid).orElseThrow(() ->
                 new RestApiException(INVALID_ID_OR_PASSWORD));
 
         if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {

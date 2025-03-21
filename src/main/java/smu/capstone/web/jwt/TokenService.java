@@ -16,7 +16,7 @@ import static smu.capstone.common.errorcode.AuthExceptionCode.REFRESH_TOKEN_NOT_
 @RequiredArgsConstructor
 @Slf4j
 public class TokenService {
-    private static final String PAYLOAD_VALUE = "userid";
+    private static final String PAYLOAD_VALUE = "accountId";
     private final RefreshTokenCacheRepository refreshTokenCacheRepository;
     private final TokenProvider tokenProvider;
 

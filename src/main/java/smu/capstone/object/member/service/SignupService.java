@@ -31,7 +31,7 @@ public class SignupService {
 
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
-        if (userRepository.existsByUserid(authRequestDto.getUserid())) {
+        if (userRepository.existsByAccountId(authRequestDto.getAccountId())) {
             throw new RestApiException(DUPLICATED_ID);
         }
 

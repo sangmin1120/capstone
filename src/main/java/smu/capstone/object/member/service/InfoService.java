@@ -14,6 +14,7 @@ import smu.capstone.web.jwt.TokenProvider;
 import smu.capstone.web.jwt.TokenService;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASSWORD;
+import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_USER;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class InfoService {
 
         String userid = tokenService.getUserid(accessToken);
         log.info("userid={}", userid);
-        userRepository.findByUserid(userid).ifPresentOrElse(user -> {
+        userRepository.findByAccountId(userid).ifPresentOrElse(user -> {
             user.setPassword(passwordEncoder.encode(modifyDto.getNewPassword()));
             userRepository.save(user);
         }, () -> {
@@ -44,7 +45,7 @@ public class InfoService {
     public UserEntity getCurrentUser(HttpServletRequest request) {
         String accessToken = tokenProvider.getAccessToken(request);
         String userid = tokenService.getUserid(accessToken);
-        UserEntity userEntity = userRepository.findByUserid(userid).orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
+        UserEntity userEntity = userRepository.findByAccountId(userid).orElseThrow(() -> new RestApiException(NOT_FOUND_USER));
         return userEntity;
     }
 }
