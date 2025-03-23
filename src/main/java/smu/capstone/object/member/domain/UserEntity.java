@@ -4,7 +4,7 @@ package smu.capstone.object.member.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import smu.capstone.object.common.BaseEntity;
+import smu.capstone.common.domain.BaseEntity;
 
 
 /**
