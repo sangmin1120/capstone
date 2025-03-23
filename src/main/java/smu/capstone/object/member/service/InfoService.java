@@ -10,6 +10,7 @@ import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.respository.UserRepository;
+import smu.capstone.object.member.util.LoginUserUtil;
 import smu.capstone.web.jwt.TokenProvider;
 import smu.capstone.web.jwt.TokenService;
 
@@ -42,10 +43,8 @@ public class InfoService {
         });
     }
 
-    public UserEntity getCurrentUser(HttpServletRequest request) {
-        String accessToken = tokenProvider.getAccessToken(request);
-        String userid = tokenService.getUserid(accessToken);
-        UserEntity userEntity = userRepository.findByAccountId(userid).orElseThrow(() -> new RestApiException(NOT_FOUND_USER));
-        return userEntity;
+    public UserEntity getCurrentUser() {
+        Long userId = LoginUserUtil.getLoginMemberId();
+        return userRepository.findById(userId).orElseThrow(()-> new RestApiException(NOT_FOUND_USER));
     }
 }
