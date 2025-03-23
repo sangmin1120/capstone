@@ -15,14 +15,14 @@ public class LikeController {
     private final LikeService likeService;
 
     @PostMapping("/{boardId}/like")
-    public BaseResponse<String> likeBoard(@PathVariable("boardId") Long boardId, HttpServletRequest request) {
-        String response = likeService.likeBoard(boardId, request);
+    public BaseResponse<String> likeBoard(@PathVariable("boardId") Long boardId) {
+        String response = likeService.likeBoard(boardId);
         return BaseResponse.ok(response);
     }
 
     @DeleteMapping("/{boardId}/like")
-    public BaseResponse<String> unlikeBoard(@PathVariable("boardId") Long boardId, HttpServletRequest request) {
-        String response = likeService.unlikeBoard(boardId, request);
+    public BaseResponse<String> unlikeBoard(@PathVariable("boardId") Long boardId) {
+        String response = likeService.unlikeBoard(boardId);
         return BaseResponse.ok(response);
     }
 }

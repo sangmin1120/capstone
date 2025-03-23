@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class ExerciseDiaryRequestDto {
 
     private String content; // 운동 기록 내용
-    private Double distance; // 이동 거리 (km)
+    private Double distance; // 이동 거리 (km) -> 기록 저장, 수정에서 사용?
     // private List<GPSLocation> locations;  // GPS 좌표 리스트 추가
     // GPSLocation 클래스 만들고 구현 시작해야함..
 }

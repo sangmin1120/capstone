@@ -23,9 +23,9 @@ public class BoardModifyService {
     private final InfoService infoService;
 
     @Transactional
-    public Board createBoard(BoardRequestDto requestDto, HttpServletRequest request) {
+    public Board createBoard(BoardRequestDto requestDto) {
         // 작성자 찾기
-        UserEntity currentUser = infoService.getCurrentUser(request);
+        UserEntity currentUser = infoService.getCurrentUser();
 
         // 게시글 생성
         Board board = Board.builder()
@@ -38,9 +38,9 @@ public class BoardModifyService {
         return boardRepository.save(board);
     }
 
-    public void updateBoard(Long boardId, BoardRequestDto requestDto, HttpServletRequest request) {
+    public void updateBoard(Long boardId, BoardRequestDto requestDto) {
 
-        UserEntity currentUser = infoService.getCurrentUser(request);
+        UserEntity currentUser = infoService.getCurrentUser();
         Optional<Board> board = boardRepository.findById(boardId);
         if (!currentUser.equals(board.get().getUser())) {
             throw new RestApiException(NOT_FOUND_BOARD_ID);
@@ -51,8 +51,8 @@ public class BoardModifyService {
         boardRepository.save(updated);
     }
 
-    public void deleteBoard(Long id, HttpServletRequest request) {
-        UserEntity currentUser = infoService.getCurrentUser(request);
+    public void deleteBoard(Long id) {
+        UserEntity currentUser = infoService.getCurrentUser();
         Optional<Board> board = boardRepository.findById(id);
 
         // 게시글의 주인이 아니면 삭제 불가

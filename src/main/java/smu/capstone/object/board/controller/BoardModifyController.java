@@ -17,20 +17,20 @@ public class BoardModifyController {
     private final BoardModifyService boardModifyService;
 
     @PostMapping
-    public BaseResponse<BoardResponseDto> createBoard(@RequestBody BoardRequestDto requestDto, HttpServletRequest request) {
-        Board board = boardModifyService.createBoard(requestDto, request);
+    public BaseResponse<BoardResponseDto> createBoard(@RequestBody BoardRequestDto requestDto) {
+        Board board = boardModifyService.createBoard(requestDto);
         return BaseResponse.ok(new BoardResponseDto(board));
     }
 
     @PutMapping("/{boardId}")
     public BaseResponse<Void> updateBoard(@PathVariable("boardId") Long boardId, @RequestBody BoardRequestDto requestDto, HttpServletRequest request) {
-        boardModifyService.updateBoard(boardId, requestDto, request);
+        boardModifyService.updateBoard(boardId, requestDto);
         return BaseResponse.ok();
     }
 
     @DeleteMapping("/{boardId}")
-    public BaseResponse<Void> deleteBoard(@PathVariable("boardId") Long boardId, HttpServletRequest request) {
-        boardModifyService.deleteBoard(boardId, request);
+    public BaseResponse<Void> deleteBoard(@PathVariable("boardId") Long boardId) {
+        boardModifyService.deleteBoard(boardId);
         return BaseResponse.ok();
     }
 
