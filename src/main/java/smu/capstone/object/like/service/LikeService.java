@@ -1,6 +1,5 @@
 package smu.capstone.object.like.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +25,11 @@ public class LikeService {
 
 
     @Transactional
-    public String likeBoard(Long boardId, HttpServletRequest request) {
+    public String likeBoard(Long boardId) {
         //  게시글 및 사용자 찾기
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
-        UserEntity user = infoService.getCurrentUser(request);
+        UserEntity user = infoService.getCurrentUser();
 
         // 사용자가 이미 좋아요를 눌렀는지 확인
         if (likeRepository.existsByUserAndBoard(user, board)) {
@@ -50,11 +49,11 @@ public class LikeService {
     }
 
     @Transactional
-    public String unlikeBoard(Long boardId, HttpServletRequest request) {
+    public String unlikeBoard(Long boardId) {
         // 게시글 및 사용자 찾기
         Board board = boardRepository.findById(boardId)
                 .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
-        UserEntity user = infoService.getCurrentUser(request);
+        UserEntity user = infoService.getCurrentUser();
 
         // 좋아요 존재 여부 확인 후 삭제
         Optional<Like> like = likeRepository.findByUserAndBoard(user, board);

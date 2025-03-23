@@ -35,6 +35,11 @@ public class SecurityConfig {
                 .csrf((auth) -> auth.disable());
 
 
+        http
+                .exceptionHandling(configurer -> {
+                configurer.authenticationEntryPoint(jwtAuthenticationEntryPoint);
+                configurer.accessDeniedHandler(jwtAccessDeniedHandler);
+                });
         //Form 로그인 방식 disable
         http
                 .formLogin((auth) -> auth.disable());
@@ -50,6 +55,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/user-auth/**", "/api/user-search/**").permitAll()
+                        .requestMatchers("/api/map/**").permitAll() //임시
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")

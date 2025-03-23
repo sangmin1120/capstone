@@ -22,9 +22,9 @@ public class CommentController {
     //  댓글 작성
     @PostMapping
     public BaseResponse<CommentResponseDto> addComment(@PathVariable("boardId") Long boardId,
-                                                       @RequestBody CommentRequestDto requestDto, HttpServletRequest request) {
+                                                       @RequestBody CommentRequestDto requestDto) {
 
-        Long userId = infoService.getCurrentUser(request).getId();
+        Long userId = infoService.getCurrentUser().getId();
         CommentResponseDto response = commentService.addComment(boardId, userId, requestDto);
         return BaseResponse.ok(response);
     }
@@ -38,9 +38,8 @@ public class CommentController {
 
     //  댓글 삭제
     @DeleteMapping("/{commentId}")
-    public BaseResponse<String> deleteComment(@PathVariable("boardId") Long boardId, @PathVariable("commentId") Long commentId
-    , HttpServletRequest request) {
-        Long userId = infoService.getCurrentUser(request).getId();
+    public BaseResponse<String> deleteComment(@PathVariable("boardId") Long boardId, @PathVariable("commentId") Long commentId) {
+        Long userId = infoService.getCurrentUser().getId();
         commentService.deleteComment(commentId, userId);
         return BaseResponse.ok("댓글이 삭제되었습니다.");
     }

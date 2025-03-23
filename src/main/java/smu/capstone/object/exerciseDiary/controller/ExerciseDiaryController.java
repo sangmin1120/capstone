@@ -18,15 +18,15 @@ public class ExerciseDiaryController {
     private final ExerciseDiaryService exerciseDiaryService;
 
     @PostMapping
-    public BaseResponse<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto requestDto, HttpServletRequest request) {
-        ExerciseDiaryResponseDto response = exerciseDiaryService.createExerciseDiary(requestDto, request);
+    public BaseResponse<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto requestDto) {
+        ExerciseDiaryResponseDto response = exerciseDiaryService.createExerciseDiary(requestDto);
         return BaseResponse.ok(response);
     }
 
     // 사용자의 모든 운동 기록 조회
     @GetMapping
-    public BaseResponse<List<ExerciseDiaryResponseDto>> getUserDiaries(HttpServletRequest request) {
-        List<ExerciseDiaryResponseDto> diaries = exerciseDiaryService.getUserDiaries(request);
+    public BaseResponse<List<ExerciseDiaryResponseDto>> getUserDiaries() {
+        List<ExerciseDiaryResponseDto> diaries = exerciseDiaryService.getUserDiaries();
         return BaseResponse.ok(diaries);
     }
 
@@ -35,14 +35,14 @@ public class ExerciseDiaryController {
     public BaseResponse<ExerciseDiaryResponseDto> updateDiary(
             @PathVariable("diaryId") Long diaryId,
             @RequestBody ExerciseDiaryRequestDto requestDto, HttpServletRequest request) {
-        ExerciseDiaryResponseDto updatedDiary = exerciseDiaryService.updateDiary(diaryId, requestDto, request);
+        ExerciseDiaryResponseDto updatedDiary = exerciseDiaryService.updateDiary(diaryId, requestDto);
         return BaseResponse.ok(updatedDiary);
     }
 
     // 운동 기록 삭제
     @DeleteMapping("/{diaryId}")
-    public BaseResponse<String> deleteDiary(@PathVariable("diaryId") Long diaryId, HttpServletRequest request) {
-        exerciseDiaryService.deleteDiary(diaryId, request);
+    public BaseResponse<String> deleteDiary(@PathVariable("diaryId") Long diaryId) {
+        exerciseDiaryService.deleteDiary(diaryId);
         return BaseResponse.ok("운동 기록이 삭제되었습니다.");
     }
 }
