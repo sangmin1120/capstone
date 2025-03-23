@@ -2,12 +2,8 @@ package smu.capstone.object.exerciseDiary.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import smu.capstone.object.common.BaseEntity;
+import smu.capstone.common.domain.BaseEntity;
 import smu.capstone.object.member.domain.UserEntity;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "exercise_diary")

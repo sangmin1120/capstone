@@ -3,10 +3,8 @@ package smu.capstone.object.board.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import smu.capstone.object.board.dto.BoardRequestDto;
-import smu.capstone.object.common.BaseEntity;
+import smu.capstone.common.domain.BaseEntity;
 import smu.capstone.object.member.domain.UserEntity;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "boards")

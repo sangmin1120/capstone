@@ -1,4 +1,4 @@
-package smu.capstone.object.common;
+package smu.capstone.common.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
