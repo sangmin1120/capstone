@@ -49,6 +49,9 @@ dependencies {
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
+	implementation 'javax.servlet:jstl' //jstl을 사용하기 위한 주입
+	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'//jsp를 사용하기 위한 주입
+
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

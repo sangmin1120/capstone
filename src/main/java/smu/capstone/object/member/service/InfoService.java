@@ -1,6 +1,5 @@
 package smu.capstone.object.member.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,10 +10,7 @@ import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.respository.UserRepository;
 import smu.capstone.object.member.util.LoginUserUtil;
-import smu.capstone.web.jwt.TokenProvider;
-import smu.capstone.web.jwt.TokenService;
 
-import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASSWORD;
 import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_USER;
 
 @Service
@@ -23,24 +19,15 @@ import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_USER;
 public class InfoService {
 
     private final UserRepository userRepository;
-    private final TokenProvider tokenProvider;
-    private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public void modifyPassword(HttpServletRequest request, AuthRequestDto.Modify modifyDto) {
+    public void changePassword(AuthRequestDto.Modify modifyDto) {
 
         //1. 검증 + userid 가져오기
-        String accessToken = tokenProvider.getAccessToken(request);
-
-        String userid = tokenService.getUserid(accessToken);
-        log.info("userid={}", userid);
-        userRepository.findByAccountId(userid).ifPresentOrElse(user -> {
-            user.setPassword(passwordEncoder.encode(modifyDto.getNewPassword()));
-            userRepository.save(user);
-        }, () -> {
-            throw new RestApiException(INVALID_ID_OR_PASSWORD);
-        });
+        UserEntity userEntity = getCurrentUser();
+        userEntity.setPassword(passwordEncoder.encode(modifyDto.getNewPassword()));
+        userRepository.save(userEntity);
     }
 
     public UserEntity getCurrentUser() {

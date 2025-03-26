@@ -1,6 +1,5 @@
 package smu.capstone.object.member.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,9 +20,9 @@ public class InfoController {
 
     // 비밀번호 변경
     @PostMapping("/password-modify")
-    public BaseResponse<Void> modifyPassword(HttpServletRequest request, @RequestBody AuthRequestDto.Modify modifyDto) {
+    public BaseResponse<Void> modifyPassword(@RequestBody AuthRequestDto.Modify modifyDto) {
         log.info("Modify password");
-        infoService.modifyPassword(request, modifyDto);
+        infoService.changePassword(modifyDto);
 
         return BaseResponse.ok();
     }

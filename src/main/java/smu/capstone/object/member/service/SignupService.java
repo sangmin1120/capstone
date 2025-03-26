@@ -10,6 +10,7 @@ import smu.capstone.common.exception.RestApiException;
 import smu.capstone.object.member.domain.UserEntity;
 import smu.capstone.object.member.dto.AuthRequestDto;
 import smu.capstone.object.member.respository.UserRepository;
+import smu.capstone.object.member.service.EmailService.EmailType;
 import smu.capstone.web.jwt.redisdomain.MailVerificationCache;
 import smu.capstone.web.jwt.redisrepository.MailVerificationCacheRepository;
 
@@ -52,7 +53,7 @@ public class SignupService {
         userRepository.findByEmail(authRequestDto.getEmail()).ifPresent((user) -> {
             throw new RestApiException(DUPLICATED_MAIL);
         });
-        String certificationKey = emailService.sendCertificationKey(authRequestDto.getEmail());
+        String certificationKey = emailService.sendCertificationKey(authRequestDto.getEmail(), EmailType.SIGNUP_CODE_MAIL);
         mailVerificationCacheRepository.save(MailVerificationCache.builder()
                 .email(authRequestDto.getEmail())
                 .verificationKey(certificationKey)
