@@ -93,7 +93,7 @@ public class LoginService {
     private void setRefreshTokenCookieWhenProd(HttpServletResponse response, Cookie cookie) {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setDomain("smnavi.me");
+        cookie.setDomain("rehab.me");
         cookie.setSecure(true);
         response.addCookie(cookie);
     }
