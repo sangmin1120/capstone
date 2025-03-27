@@ -43,6 +43,8 @@ dependencies {
 
 	// SMTP 인증
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	//rabbitMQ
+	implementation 'org.springframework.boot:spring-boot-starter-amqp'
 
 	//H2 데이터베이스 추가
 	runtimeOnly 'com.h2database:h2'
