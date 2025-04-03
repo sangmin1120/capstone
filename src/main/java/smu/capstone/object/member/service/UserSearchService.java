@@ -12,6 +12,7 @@ import smu.capstone.object.member.respository.UserRepository;
 import smu.capstone.object.member.service.EmailService.EmailType;
 import smu.capstone.web.jwt.redisdomain.MailVerificationCache;
 import smu.capstone.web.jwt.redisrepository.MailVerificationCacheRepository;
+import smu.capstone.web.rabbitmq.MessageSender;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.*;
 
@@ -25,6 +26,8 @@ public class UserSearchService {
     private final PasswordEncoder passwordEncoder;
     private final MailVerificationCacheRepository mailVerificationCacheRepository;
     private final EmailService emailService;
+
+    private final MessageSender messageSender;
 
     //accountId 찾기
     public String searchId(UserSearchDto.SearchIdRequest searchIdRequest) {
@@ -71,14 +74,6 @@ public class UserSearchService {
         userRepository.findByEmail(authRequestDto.getEmail())
                 .orElseThrow(()->new RestApiException(INVALID_ID_OR_PASSWORD));
 
-        String certificationKey = emailService.sendCertificationKey(authRequestDto.getEmail(), EmailType.PASSWORD_CODE_MAIL);
-
-        mailVerificationCacheRepository.deleteById(authRequestDto.getEmail());
-        mailVerificationCacheRepository.save(MailVerificationCache.builder()
-                .email(authRequestDto.getEmail())
-                .verificationKey(certificationKey)
-                .isVerify(false)
-                .expiration(CERTIFICATION_KEY_EXPIRE_SECONDS)
-                .build());
+        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.PASSWORD_CODE_MAIL);
     }
 }

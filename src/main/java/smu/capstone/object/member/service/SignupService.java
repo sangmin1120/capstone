@@ -13,6 +13,7 @@ import smu.capstone.object.member.respository.UserRepository;
 import smu.capstone.object.member.service.EmailService.EmailType;
 import smu.capstone.web.jwt.redisdomain.MailVerificationCache;
 import smu.capstone.web.jwt.redisrepository.MailVerificationCacheRepository;
+import smu.capstone.web.rabbitmq.MessageSender;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.*;
 
@@ -27,8 +28,8 @@ public class SignupService {
     private final MailVerificationCacheRepository mailVerificationCacheRepository;
 
     private final PasswordEncoder passwordEncoder;
-    private final EmailService emailService;
 
+    private final MessageSender messageSender;
 
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
@@ -53,13 +54,7 @@ public class SignupService {
         userRepository.findByEmail(authRequestDto.getEmail()).ifPresent((user) -> {
             throw new RestApiException(DUPLICATED_MAIL);
         });
-        String certificationKey = emailService.sendCertificationKey(authRequestDto.getEmail(), EmailType.SIGNUP_CODE_MAIL);
-        mailVerificationCacheRepository.save(MailVerificationCache.builder()
-                .email(authRequestDto.getEmail())
-                .verificationKey(certificationKey)
-                .isVerify(false)
-                .expiration(CERTIFICATION_KEY_EXPIRE_SECONDS)
-                .build());
+        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.SIGNUP_CODE_MAIL);
     }
 
     public void verifyMail(AuthRequestDto.@Valid VerificationMail authRequestDto) {
