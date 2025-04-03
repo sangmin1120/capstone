@@ -23,6 +23,16 @@ repositories {
 	mavenCentral()
 }
 
+// 실행 가능한 JAR 생성 설정
+bootJar {
+	enabled = true
+}
+
+// 일반 JAR 파일 생성 비활성화
+jar {
+	enabled = false
+}
+
 dependencies {
 
 	// JPA
@@ -51,14 +61,15 @@ dependencies {
 	//redis
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 
-	implementation 'javax.servlet:jstl' //jstl을 사용하기 위한 주입
-	implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'//jsp를 사용하기 위한 주입
-
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	//test 환경
+	testCompileOnly 'org.projectlombok:lombok'
+	testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
 tasks.named('test') {
