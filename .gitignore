@@ -38,3 +38,9 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### docker data ###
+rabbitmq-data
+data
+h2
+.docker
