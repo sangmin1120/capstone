@@ -20,7 +20,7 @@ public class EmailService {
 
     private final JavaMailSender javaMailSender;
 
-    @Value("${spring.mail.username}")
+    @Value("${mail.username}")
     private String username;
 
     public String sendCertificationKey(String targetEmail, EmailType type) {
