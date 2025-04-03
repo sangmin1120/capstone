@@ -40,9 +40,9 @@ public class TokenProvider {
     private static final String AUTHORITY_KEY = "auth";
     private static final String PAYLOAD_VALUE = "accountId";
 
-    @Value("${JWT_ACCESS_TOKEN_SECRET_KEY}")
+    @Value("${spring.jwt.access-token-secret-key}")
     private String accessTokenSecretKey;
-    @Value("${JWT_REFRESH_TOKEN_SECRET_KEY}")
+    @Value("${spring.jwt.refresh-token-secret-key}")
     private String refreshTokenSecretKey;
 
     private Key accessTokenKey;
