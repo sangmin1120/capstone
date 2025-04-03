@@ -22,24 +22,3 @@ spring:
 logging:
   level:
     root: info
-mail:
-  host: smtp.gmail.com
-  port: 587
-  username: ${MAIL_USERNAME}
-  password: ${MAIL_PASSWORD}
-  properties:
-    mail.smtp.auth: true
-    mail.smtp.timeout: 5000
-    mail.smtp.starttls.enable: true
-
-rabbitmq:
-  host: ${RABBITMQ_NAME}
-  port: ${RABBITMQ_PORT}
-  username: ${RABBITMQ_USERNAME}
-  password: ${RABBITMQ_PASSWORD}
-  queue:
-    name: sample.queue
-  exchange:
-    name: sample.exchange
-  routing:
-    key: sample.key
