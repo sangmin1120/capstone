@@ -1,53 +1,45 @@
-spring.application.name=capstone
+spring:
+  application:
+    name: capstone
+  #Import .env file
+  config:
+    import: optional:file:.env[.properties]
+  #swagger
+  doc:
+    api-docs:
+      enabled: true
+    swagger-ui:
+      enabled: true
+      path: /swagger-ui.html
 
-#MySql
-#spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
-#spring.datasource.url=jdbc:mysql://capstonemysql1.mysql.database.azure.com/capstone1
-#spring.datasource.username=capstone1
-#spring.datasource.password=@Gatache78
+  # H2 Database (test)
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:tcp://${H2_NAME}:${H2_PORT}/demo
+    username: ${H2_USERNAME}
+    password: ${H2_PASSWORD}
 
-spring.jpa.properties.hibernate.show_sql=true
-spring.jpa.hibernate.ddl-auto=update
+logging:
+  level:
+    root: info
+mail:
+  host: smtp.gmail.com
+  port: 587
+  username: ${MAIL_USERNAME}
+  password: ${MAIL_PASSWORD}
+  properties:
+    mail.smtp.auth: true
+    mail.smtp.timeout: 5000
+    mail.smtp.starttls.enable: true
 
-#토큰 key
-JWT_ACCESS_TOKEN_SECRET_KEY=64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff
-JWT_REFRESH_TOKEN_SECRET_KEY=64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff
-
-#SMTP 설정
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=sangmin8276@gmail.com
-spring.mail.password=hhnagsharlxceqgs
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.timeout=5000
-spring.mail.properties.mail.smtp.starttls.enable=true
-
-#rabbitMQ
-spring.rabbitmq.host=localhost
-spring.rabbitmq.port=5672
-spring.rabbitmq.username=rehab
-spring.rabbitmq.password=rehab@
-#queue, exchange, routing-key 정보
-rabbitmq.queue.name=queue.verifyMail
-rabbitmq.exchange.name=sample.exchange
-rabbitmq.routing.key=sample.verifyMail
-
-#openApi 문서 활성화
-springdoc.api-docs.enabled=true
-#ui 활성화
-springdoc.swagger-ui.enabled=true 
-#기본 접속 경로 지정
-springdoc.swagger-ui.path=/swagger-ui.html
-#일반화된 응답 사용 여부 결정
-springdoc.override-with-generic-response=false
-
-#H2 test
-spring.profiles.active=local
-spring.datasource.url= jdbc:h2:tcp://localhost/~/test
-spring.datasource.username=sa
-spring.datasource.password=
-#redis
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
-
-logging.level.root=info
+rabbitmq:
+  host: ${RABBITMQ_NAME}
+  port: ${RABBITMQ_PORT}
+  username: ${RABBITMQ_USERNAME}
+  password: ${RABBITMQ_PASSWORD}
+  queue:
+    name: sample.queue
+  exchange:
+    name: sample.exchange
+  routing:
+    key: sample.key
