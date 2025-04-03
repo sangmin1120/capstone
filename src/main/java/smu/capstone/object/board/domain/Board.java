@@ -2,6 +2,7 @@ package smu.capstone.object.board.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import smu.capstone.object.board.dto.BoardRequestDto;
 import smu.capstone.common.domain.BaseEntity;
 import smu.capstone.object.member.domain.UserEntity;
@@ -36,7 +37,7 @@ public class Board extends BaseEntity {
 
     private String imgUrl;
 
-    private int likeCount = 0; // 좋아요 수 추가
+    private int likeCount; // 좋아요 수 추가
 
     public void increaseLike() {
         this.likeCount++;
