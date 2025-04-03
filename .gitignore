@@ -18,7 +18,9 @@ bin/
 !**/src/test/**/bin/
 
 ### IntelliJ IDEA ###
-application.properties //azure 보안문제 때문에
+*.properties //azure 보안문제 때문에
+*.yml
+.env
 .idea
 *.iws
 *.iml

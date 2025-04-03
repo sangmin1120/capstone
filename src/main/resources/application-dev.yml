@@ -22,6 +22,16 @@ spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.timeout=5000
 spring.mail.properties.mail.smtp.starttls.enable=true
 
+#rabbitMQ
+spring.rabbitmq.host=localhost
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=rehab
+spring.rabbitmq.password=rehab@
+#queue, exchange, routing-key 정보
+rabbitmq.queue.name=queue.verifyMail
+rabbitmq.exchange.name=sample.exchange
+rabbitmq.routing.key=sample.verifyMail
+
 #openApi 문서 활성화
 springdoc.api-docs.enabled=true
 #ui 활성화
