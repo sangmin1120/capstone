@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import smu.capstone.CapstoneApplication;
 import smu.capstone.domain.member.dto.AuthRequestDto;
+import smu.capstone.intrastructure.mail.service.EmailService;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;

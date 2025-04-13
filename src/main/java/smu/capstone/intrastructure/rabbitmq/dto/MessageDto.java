@@ -5,8 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import smu.capstone.intrastructure.mail.dto.EmailType;
 
-import static smu.capstone.domain.member.service.EmailService.*;
 
 @Getter
 @Setter
@@ -17,12 +17,10 @@ public class MessageDto {
 
     private String email;
     private EmailType type;
+    private String payLoad;
 
-    @Getter
-    @Setter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    static class Mail {
-        private String email;
+    public MessageDto(String email, EmailType type) {
+        this.email = email;
+        this.type = type;
     }
 }

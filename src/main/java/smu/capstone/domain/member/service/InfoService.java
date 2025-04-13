@@ -21,6 +21,7 @@ public class InfoService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // 비밀번호 변경
     @Transactional
     public void changePassword(AuthRequestDto.Modify modifyDto) {
 
@@ -30,6 +31,7 @@ public class InfoService {
         userRepository.save(userEntity);
     }
 
+    // 현재 유저 정보
     public UserEntity getCurrentUser() {
         Long userId = LoginUserUtil.getLoginMemberId();
         return userRepository.findById(userId).orElseThrow(()-> new RestApiException(NOT_FOUND_USER));

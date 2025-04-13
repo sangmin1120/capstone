@@ -1,15 +1,18 @@
 package smu.capstone.domain.member.service;
 
+import jakarta.mail.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.common.util.CertificationKeyGenerator;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.dto.UserSearchDto;
 import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.domain.member.service.EmailService.EmailType;
+import smu.capstone.intrastructure.mail.service.EmailService;
+import smu.capstone.intrastructure.mail.dto.EmailType;
 import smu.capstone.intrastructure.redis.domain.MailVerificationCache;
 import smu.capstone.intrastructure.redis.repository.MailVerificationCacheRepository;
 import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
@@ -62,7 +65,9 @@ public class UserSearchService {
                 .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
 
         //새로운 비밀번호 전송
-        String newPassword = emailService.sendCertificationKey(authRequestDto.getEmail(), EmailType.PASSWORD_RESET);
+        String newPassword = CertificationKeyGenerator.generateStrongKey();
+        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.PASSWORD_RESET, newPassword);
+//                emailService.sendCertificationKey(authRequestDto.getEmail(), EmailType.PASSWORD_RESET);
         // 비밀번호 변경
         userEntity.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(userEntity);

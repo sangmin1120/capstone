@@ -10,7 +10,7 @@ import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.domain.member.service.EmailService.EmailType;
+import smu.capstone.intrastructure.mail.dto.EmailType;
 import smu.capstone.intrastructure.redis.domain.MailVerificationCache;
 import smu.capstone.intrastructure.redis.repository.MailVerificationCacheRepository;
 import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
