@@ -10,34 +10,20 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 // baseScan으로 스캔 범위를 적용해주어야 됨
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${spring.rabbitmq.host}")
-    private String rabbitmqHost;
-
-    @Value("${spring.rabbitmq.port}")
-    private int rabbitmqPort;
-
-    @Value("${spring.rabbitmq.username}")
-    private String rabbitmqUsername;
-
-    @Value("${spring.rabbitmq.password}")
-    private String rabbitmqPassword;
-
-    @Value("${spring.rabbitmq.queue.name}")
-    private String queueName;
-
-    @Value("${spring.rabbitmq.exchange.name}")
-    private String exchangeName;
-
-    @Value("${spring.rabbitmq.routing.key}")
-    private String routingKey;
+    @Autowired
+    private RabbitMQProperties rabbitMQProperties;
 
     /**
      * 지정된 큐 이름으로 Queue 빈을 생성
@@ -45,8 +31,10 @@ public class RabbitMQConfig {
      * @return Queue 빈 객체
      */
     @Bean
-    public Queue queue() {
-        return new Queue(queueName, true, false, false);
+    public List<Queue> queues() {
+        return rabbitMQProperties.getBindings().stream()
+                .map(binding -> new Queue(binding.getQueue().getName()))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -55,20 +43,28 @@ public class RabbitMQConfig {
      * @return TopicExchange 빈 객체
      */
     @Bean
-    public DirectExchange exchange() {
-        return new DirectExchange(exchangeName);
+    public List<DirectExchange> exchanges() {
+        return rabbitMQProperties.getBindings().stream()
+                .map(binding -> new DirectExchange(binding.getExchange().getName()))
+                .collect(Collectors.toList());
     }
 
     /**
      * 주어진 큐와 익스체인지를 바인딩하고 라우팅 키를 사용하여 Binding 빈을 생성
      *
-     * @param queue    바인딩할 Queue
-     * @param exchange 바인딩할 TopicExchange
      * @return Binding 빈 객체
      */
     @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with(routingKey);
+    public List<Binding> bindings(List<Queue> queues, List<DirectExchange> exchanges) {
+        return IntStream.range(0, rabbitMQProperties.getBindings().size())
+                .mapToObj(i -> {
+                    var binding = rabbitMQProperties.getBindings().get(i);
+                    return BindingBuilder
+                            .bind(queues.get(i))
+                            .to(exchanges.get(i))
+                            .with(binding.getRouting().getName());
+                })
+                .collect(Collectors.toList());
     }
 
     /**
@@ -79,10 +75,10 @@ public class RabbitMQConfig {
     @Bean
     public ConnectionFactory connectionFactory() {
         CachingConnectionFactory connectionFactory = new CachingConnectionFactory();
-        connectionFactory.setHost(rabbitmqHost);
-        connectionFactory.setPort(rabbitmqPort);
-        connectionFactory.setUsername(rabbitmqUsername);
-        connectionFactory.setPassword(rabbitmqPassword);
+        connectionFactory.setHost(rabbitMQProperties.getHost());
+        connectionFactory.setPort(rabbitMQProperties.getPort());
+        connectionFactory.setUsername(rabbitMQProperties.getUsername());
+        connectionFactory.setPassword(rabbitMQProperties.getPassword());
         return connectionFactory;
     }
 
