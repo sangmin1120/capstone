@@ -5,6 +5,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
+import org.springframework.data.redis.listener.RedisMessageListenerContainer;
+import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
+import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import smu.capstone.domain.chat.domain.ChatMessage;
+import smu.capstone.domain.chat.service.RedisSubscriber;
 
 @Configuration
 public class RedisConfig {
@@ -17,5 +25,41 @@ public class RedisConfig {
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         return new LettuceConnectionFactory(host, port);
+    }
+
+    //로컬 설정 - 필요 시 EC로 변경
+    @Bean
+    public ChannelTopic channelTopic(){
+        return new ChannelTopic("/sub/chat/");
+    }
+
+    //리스너 등록
+    //log로 등록된 channel 확인
+    @Bean
+    public RedisMessageListenerContainer redisMessageListener(
+            RedisConnectionFactory redisConnectionFactory,
+            MessageListenerAdapter listenerAdapterChatMessage,
+            ChannelTopic channelTopic){
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(redisConnectionFactory);
+        container.addMessageListener(listenerAdapterChatMessage, channelTopic);
+        return container;
+    }
+
+    //JSON 값 직렬화/역직렬화 설정
+    @Bean
+    public RedisTemplate<String, Object> redisTemplate(){
+        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new Jackson2JsonRedisSerializer<>(ChatMessage.class));
+        return redisTemplate;
+    }
+
+    //매개변수 객체에 메시지 위임
+    //defaultListenerMethod-메시지 도착 시 실행될 메서드 이름.
+    @Bean
+    public MessageListenerAdapter listenerAdapterChatMessage(RedisSubscriber subscriber){
+        return new MessageListenerAdapter(subscriber, "onMessage");
     }
 }
