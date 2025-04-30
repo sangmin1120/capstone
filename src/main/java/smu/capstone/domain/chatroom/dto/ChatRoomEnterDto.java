@@ -10,6 +10,8 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class ChatRoomEnterDto {
+    private String userId;
+    private RoomParticipantDto participant;
     private int otherUserUnreadCount;
     private List<ChatMessage> chatMessageList;
 }

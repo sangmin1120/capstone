@@ -26,12 +26,14 @@ public class RedisPublisher {
 
         validateMessage(chatMessageDto);
         ChatMessage chatMessage = getChatMessage(chatMessageDto);
+        log.info("메시지 전송 처리 중: {}", chatMessage);
         if(chatMessage == null) {
             throw new ChatException(ChatExceptionCode.DATA_BIND_ERROR);
         }
         //레디스 메시지 전송
         sendMessageToRedis(chatMessage);
 
+        log.info("전송 성공");
         //전송 성공 시에만 저장 시도
         asyncChatMessageService.saveChatMessage(chatMessage);
         asyncChatMessageService.updateChatRoomInfo(chatMessage);
@@ -55,9 +57,16 @@ public class RedisPublisher {
             throw new ChatException(ChatExceptionCode.NULL_CONTENT);
         }
 
+        if(chatMessageDto.getChatRoomId() == null || chatMessageDto.getChatRoomId().isEmpty()) {
+            log.error("chat room id is null or empty");
+            throw new ChatException(ChatExceptionCode.NULL_CONTENT);
+        }
+
         //메시지 Type 확인
-        if (chatMessageDto.getMessageType()!=null && chatMessageDto.getMessageType().equals(ChatMessage.MessageType.READ)) {
-            log.error("Error: received read message");
+        if (chatMessageDto.getMessageType()!=null &&
+                (chatMessageDto.getMessageType().equals(ChatMessage.MessageType.READ) ||
+                        chatMessageDto.getMessageType().equals(ChatMessage.MessageType.LEAVE))) {
+            log.error("Error: received other type message");
             throw new ChatException(ChatExceptionCode.INVALID_MESSAGE_TYPE);
         }
     }

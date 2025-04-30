@@ -18,8 +18,8 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Stri
             "JOIN FETCH c1.chatRoom cr " +
             "JOIN FETCH c1.userEntity ue " +
             "JOIN ChatRoomUser c2 ON c1.chatRoom.id = c2.chatRoom.id " +
-            "WHERE (c1.userEntity.id = :userId AND c2.userEntity.id = :otherId)")
-    Optional<ChatRoomUser> findByUserEntity_Ids(@Param("userId") Long userId, @Param("otherId") Long otherId);
+            "WHERE (c1.userEntity.id = :userId AND c2.userEntity.email = :otherEmail)")
+    Optional<ChatRoomUser> findByUserEntity_userIdAndOtherUserEmail(@Param("userId") Long userId, @Param("otherEmail") String otherEmail);
 
     @Query("""
         SELECT cru FROM ChatRoomUser cru
