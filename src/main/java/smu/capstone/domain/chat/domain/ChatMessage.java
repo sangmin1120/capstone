@@ -36,6 +36,6 @@ public class ChatMessage {
      * READ: 유저 입장 메시지(읽음 처리)
      */
     public enum MessageType {
-        TEXT, IMAGE, FILE, READ
+        TEXT, IMAGE, FILE, READ, LEAVE
     }
 }

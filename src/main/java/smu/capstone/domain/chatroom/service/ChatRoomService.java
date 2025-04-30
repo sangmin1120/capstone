@@ -17,7 +17,6 @@ import smu.capstone.domain.chatroom.exception.ChatRoomException;
 import smu.capstone.domain.chatroom.repository.ChatRoomRepository;
 import smu.capstone.domain.chatroom.repository.ChatRoomUserRepository;
 import smu.capstone.domain.member.entity.UserEntity;
-import smu.capstone.domain.member.entity.UserType;
 import smu.capstone.domain.member.respository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -26,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static smu.capstone.domain.member.util.LoginUserUtil.*;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -38,33 +39,33 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
 
-    public List<ChatRoomDto> getChatRoomList(Long userid) {
-        if(userid == null) {
+    public List<ChatRoomDto> getChatRoomList() {
+        Long userId = getLoginMemberId();
+        if(userId == null) {
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_USER);
         }
 
-        List<ChatRoomUser> chatRoomUserList = chatRoomUserRepository.findByUserEntity_Id(userid)
+        List<ChatRoomUser> chatRoomUserList = chatRoomUserRepository.findByUserEntity_Id(userId)
                 .orElseThrow( () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_USER)
-        );
+                );
         try {
-            List<ChatRoomDto> chatRoomList = getChatRoomsByUserId(chatRoomUserList, userid);
-            return chatRoomList;
+            return getChatRoomsByUserId(chatRoomUserList, userId);
         }catch (Exception e) {
             log.error(e.getMessage());
             throw new ChatRoomException(CommonStatusCode.INTERNAL_SERVER_ERROR);
         }
     }
 
-    ///TODO: null 처리 보강
-    public ChatRoomEnterDto enterChatRoom(String roomId, Long userid) {
-        if(roomId == null || userid == null) {
+    public ChatRoomEnterDto enterChatRoom(String roomId) {
+        Long userId = getLoginMemberId();
+        if(roomId == null || userId == null) {
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ALL);
         }
         ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
                 () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM)
         );
 
-        ChatRoomUserPair pair = ChatRoomUserPair.getPair(userid, chatRoom.getChatRoomUsers());
+        ChatRoomUserPair pair = ChatRoomUserPair.getPair(userId, chatRoom.getChatRoomUsers());
 
         //ChatMessage List 얻음
         LocalDateTime createTime = pair.getChatRoomUser().getCreatedAt();
@@ -75,7 +76,11 @@ public class ChatRoomService {
             chatMessageList = new ArrayList<>();
         }
 
+        RoomParticipantDto participant = getParticipateInfo(pair.getOtherChatRoomUser());
+
         return ChatRoomEnterDto.builder()
+                .userId(pair.getChatRoomUser().getUserEntity().getAccountId()) // entitiy의 id가 아닌 accountId가 사용됨
+                .participant(participant)
                 //다른 사람의 안 읽은 메시지수 가져옴
                 .otherUserUnreadCount(pair.getOtherChatRoomUser().getNotReadCount())
                 .chatMessageList(chatMessageList)
@@ -85,20 +90,21 @@ public class ChatRoomService {
     //있다면 기존 RoomId 반환, 없다면 새로운 RoomId 생성 후 반환
     public String createChatRoom(ChatRoomCreateDto createDto) {
 
-        Long userId = createDto.getUserId();
-        Long otherUserId = createDto.getOtherUserId();
+        Long userId = getLoginMemberId();
+        String otherUserEmail = createDto.getOtherUserEmail();
 
-        if(userId == null || otherUserId == null) {
+        if(userId == null || otherUserEmail == null) {
             throw new ChatRoomException(CommonStatusCode.INVALID_PARAMETER);
         }
 
-        try {
-            Optional<ChatRoomUser> userOps = chatRoomUserRepository.findByUserEntity_Ids(userId, otherUserId);
-            //채팅방이 없는 경우 - 생성
-            if (userOps.isEmpty()) {
-                return createNewChatRoom(userId, otherUserId);
-            }
+        Optional<ChatRoomUser> userOps = chatRoomUserRepository.findByUserEntity_userIdAndOtherUserEmail(userId, otherUserEmail);
 
+        //채팅방이 없는 경우 - 생성
+        if (userOps.isEmpty()) {
+            return createNewChatRoom(userId, otherUserEmail);
+        }
+
+        try{
             //채팅방이 있는 경우
             ChatRoomUser chatRoomUser = userOps.get();
 
@@ -107,7 +113,7 @@ public class ChatRoomService {
             //채팅방 Id 반환
             return chatRoomUser.getChatRoom().getId();
         }catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("{} {} {}",e.getMessage(),e.getCause(), e.getStackTrace());
             throw new ChatRoomException(CommonStatusCode.INTERNAL_SERVER_ERROR);
         }
     }
@@ -117,7 +123,8 @@ public class ChatRoomService {
      * 1) 채팅 상대가 INACTIVE라면 삭제
      * 2) 채팅 상대가 ACTIVE라면 UserId의 chatRoomUser 상태 INACTIVE
      */
-    public void deleteChatRoom(Long userId, String roomId) {
+    public void deleteChatRoom(String roomId) {
+        Long userId = getLoginMemberId();
         if(roomId == null || userId == null) {
             throw new ChatRoomException(CommonStatusCode.INVALID_PARAMETER);
         }
@@ -162,29 +169,29 @@ public class ChatRoomService {
         try {
             Collation collation = Collation.of("ko"); // 한국으로 로케일 설정
             Sort sort = Sort.by(Sort.Order.desc("timestamp"));
-            List<ChatMessage> list = chatMessageRepository.findAllBychatRoomId(chatRoomId, time, sort, collation);
-            return list;
+            return chatMessageRepository.findAllBychatRoomId(chatRoomId, time, sort, collation);
         }
         catch (Exception e){
             throw new ChatRoomException(CommonStatusCode.INVALID_PARAMETER);
         }
     }
 
-    /*** 같은 채팅방에 있는 상대 User가 탈퇴했는지 확인하는 메서드
-     *   삭제라면 ture, 아직 존재한다면 false
-     */
-    public boolean isDeleteUserId(String roomId, Long userId) {
-        List<ChatRoomUser> chatRoomUserList = chatRoomRepository.findById(roomId).orElseThrow(
-                () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ALL)
-        ).getChatRoomUsers();
-
-        ChatRoomUserPair userPair = ChatRoomUserPair.getPair(userId, chatRoomUserList);
-        if(userPair.getOtherChatRoomUser() == null
-                || userPair.getOtherChatRoomUser().getUserEntity() == null) {
-            return true;
-        }
-        return false;
-    }
+//    /*** 같은 채팅방에 있는 상대 User가 탈퇴했는지 확인하는 메서드
+//     *   삭제라면 ture, 아직 존재한다면 false
+//     */
+//    public boolean isDeleteUserId(String roomId, HttpServletRequest request) {
+//        Long userId = infoService.getCurrentUserId(request);
+//        List<ChatRoomUser> chatRoomUserList = chatRoomRepository.findById(roomId).orElseThrow(
+//                () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ALL)
+//        ).getChatRoomUsers();
+//
+//        ChatRoomUserPair userPair = ChatRoomUserPair.getPair(userId, chatRoomUserList);
+//        if(userPair.getOtherChatRoomUser() == null
+//                || userPair.getOtherChatRoomUser().getUserEntity() == null) {
+//            return true;
+//        }
+//        return false;
+//    }
 
     /***
      * 해당 User의 채팅방 상태가 ACTIVE인지 INACTIVE인지 확인
@@ -198,19 +205,37 @@ public class ChatRoomService {
     protected void setUserActive(ChatRoomUser chatRoomUser) {
         //INACTIVE 상태라면 설정
         if(!isUserActive(chatRoomUser)) {
-            log.info("setOtherUserActive: activation is inactive, set activation other user");
+            log.info("setUserActive: activation is inactive, set activation other user");
             chatRoomUser.setActivation(ChatRoomUser.Activation.ACTIVE);
             chatRoomUser.setCreatedAt(LocalDateTime.now());
             chatRoomUserRepository.save(chatRoomUser);
         }
     }
 
-    protected String createNewChatRoom(Long userId, Long otherUserId){
+    protected RoomParticipantDto getParticipateInfo(ChatRoomUser other){
+        if(other == null || other.getUserEntity() == null) {
+            return RoomParticipantDto.builder()
+                    .id(-1L)
+                    .imgUrl(null)
+                    .userId(null)
+                    .username(null)
+                    .userType(null).build();
+        }
+        return RoomParticipantDto.builder()
+                .userType(other.getUserEntity().getUserType())
+                .imgUrl(other.getUserEntity().getImgUrl())
+                .username(other.getUserEntity().getUsername())
+                .userId(other.getUserEntity().getAccountId()) // entitiy의 id가 아닌 accountId가 사용됨
+                .id(other.getUserEntity().getId())
+                .build();
+    }
+
+    protected String createNewChatRoom(Long userId, String otherUserEmail){
         //User 정보를 가져옴
         UserEntity user = userRepository.findById(userId).orElseThrow(
                 () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_USER)
         );
-        UserEntity otherUser = userRepository.findById(otherUserId).orElseThrow(
+        UserEntity otherUser = userRepository.findByEmail(otherUserEmail).orElseThrow(
                 () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_USER)
         );
 
@@ -243,6 +268,7 @@ public class ChatRoomService {
         }
     }
 
+
     protected List<ChatRoomDto> getChatRoomsByUserId(List<ChatRoomUser> chatRoomUserList, Long userid) {
         List<ChatRoomDto> chatRooms;
 
@@ -258,15 +284,15 @@ public class ChatRoomService {
                                     //회원이 탈퇴했을 경우 - 기본값 null 넣음
                                     RoomParticipantDto.builder()
                                             .id(-1L)
-                                            .userid("NULL")
-                                            .username("NULL")
-                                            .imgUrl("NULL")
-                                            .userType(UserType.PATIENT)
+                                            .userId(null)
+                                            .username(null)
+                                            .imgUrl(null)
+                                            .userType(null)
                                             .build()
                                     //회원이 있을 경우
                                     : RoomParticipantDto.builder()
                                     .id(user.getId())
-                                    .userid(user.getAccountId())
+                                    .userId(user.getAccountId()) // entitiy의 id가 아닌 accountId가 사용됨
                                     .username(user.getUsername())
                                     .imgUrl(user.getImgUrl())
                                     .userType(user.getUserType())
@@ -284,5 +310,4 @@ public class ChatRoomService {
                 )).collect(Collectors.toList());
         return chatRooms;
     }
-
 }

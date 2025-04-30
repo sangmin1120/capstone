@@ -60,7 +60,7 @@ public class AsyncChatMessageService {
             }
 
             //쿼리 변경 필요 -> 내부 변환하도록 바꿀 것... 혹은 <> 으로 얻거나
-            UserEntity user = userRepository.findByAccountId(message.getSender()).orElseThrow(
+            UserEntity user = userRepository.findByAccountId(message.getSender()).orElseThrow( // 이부분 sender --------------------- AccountId를 넣어줘야됨
                     () -> new ChatException(ChatExceptionCode.USER_NOT_FOUND));
             ChatRoomUser other = ChatRoomUserPair.getPair(user.getId(), chatRoomUserList).getOtherChatRoomUser();
 
@@ -68,10 +68,21 @@ public class AsyncChatMessageService {
                 other.setActivation(ChatRoomUser.Activation.ACTIVE);
             }
             other.setNotReadCount(other.getNotReadCount() + 1);
-            chatRoomUserRepository.save(other);
+
+            try {
+                chatRoomUserRepository.save(other);
+            }catch (Exception e) {
+                log.error("error:{}, exception: {}",e.getMessage(), e.getCause());
+                throw new ChatException(ChatExceptionCode.MESSAGE_SAVE_FAILED);
+            }
         }
         chatRoom.setLastMessageAt(message.getSentAt());
-        chatRoomRepository.save(chatRoom);
-        log.info("세이브 완료!!!");
+
+        try {
+            chatRoomRepository.save(chatRoom);
+        }catch (Exception e){
+            log.error("error:{}, exception: {}",e.getMessage(), e.getCause());
+            throw new ChatException(ChatExceptionCode.MESSAGE_SAVE_FAILED);
+        }
     }
 }

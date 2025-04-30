@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
 
-    @Override //굳이?
+    @Override
     Optional<ChatRoom> findById(String roomId);
 }
