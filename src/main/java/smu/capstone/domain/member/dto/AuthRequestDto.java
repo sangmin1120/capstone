@@ -36,6 +36,8 @@ public class AuthRequestDto {
         String check_password;
         String certificationKey;
         String username;
+        String phoneNumber; // 010-1111-1111
+        String birth; // 생년월일 year.month.day
         UserType userType;
 
         public UserEntity toDto(PasswordEncoder passwordEncoder) {
@@ -44,6 +46,8 @@ public class AuthRequestDto {
                     .email(email)
                     .password(passwordEncoder.encode(password))
                     .username(username)
+                    .phoneNumber(phoneNumber)
+                    .birth(birth)
                     .userType(userType)
                     .authority(Authority.ROLE_USER)
                     .build();
