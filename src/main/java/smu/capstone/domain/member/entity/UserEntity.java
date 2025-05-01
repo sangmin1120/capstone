@@ -31,6 +31,8 @@ public class UserEntity extends BaseEntity {
     String email;
     String password;
     String username;
+    String phoneNumber; // 010-1111-1111: String 형태로 저장
+    String birth; // year.birth.day: String 형태로 저장
     String imgUrl;
 
     @Enumerated(EnumType.STRING)
