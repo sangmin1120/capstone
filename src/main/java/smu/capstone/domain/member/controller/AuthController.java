@@ -59,4 +59,12 @@ public class AuthController {
 
         return BaseResponse.ok();
     }
+
+    //아이디 중복 확인
+    @PostMapping("/duplicate-accountId")
+    public BaseResponse<Void> dupAccountId(@RequestBody AuthRequestDto.DupAccountId authRequestDto) {
+        signupService.dupAccountId(authRequestDto);
+
+        return BaseResponse.ok();
+    }
 }

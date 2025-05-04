@@ -71,4 +71,13 @@ public class AuthRequestDto {
         String email;
         String verificationKey;
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class DupAccountId {
+        String accountId;
+    }
 }

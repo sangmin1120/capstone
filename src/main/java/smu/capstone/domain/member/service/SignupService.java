@@ -73,4 +73,12 @@ public class SignupService {
             throw new RestApiException(INVALID_VERIFICATION_KEY);
         }
     }
+
+    public void dupAccountId(AuthRequestDto.DupAccountId authRequestDto) {
+
+        userRepository.findByAccountId(authRequestDto.getAccountId())
+                .ifPresent((user) -> {
+                    throw new RestApiException(DUPLICATED_ID);
+                });
+    }
 }

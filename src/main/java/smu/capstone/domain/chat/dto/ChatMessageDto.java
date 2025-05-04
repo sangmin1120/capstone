@@ -14,6 +14,6 @@ public class ChatMessageDto {
     private String message;
     //프론트에서 설정할 것인지에 대한 여부 확인하기.
     private LocalDateTime timestamp;
-    private String sender;
+    private String sender; //accountId
     private ChatMessage.MessageType messageType;
 }
