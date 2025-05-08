@@ -49,6 +49,7 @@ public class LoginService {
             throw new RestApiException(INVALID_ID_OR_PASSWORD);
         }
 
+        // JWT token 처리
         String accessToken = tokenProvider.createToken(ACCESS_TOKEN, user.getId(), userid, user.getAuthority().name());
         Authentication authentication = tokenProvider.createAuthenticationByAccessToken(accessToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -56,6 +57,10 @@ public class LoginService {
         String refreshToken = tokenProvider.createToken(REFRESH_TOKEN, user.getId(), userid, user.getAuthority().name());
         saveRefreshToken(refreshToken);
         setRefreshTokenCookie(response, refreshToken);
+
+        // FCM 토큰 저장
+        user.setFcmToken(authRequestDto.getFcmToken());
+        userRepository.save(user); // 로그인 할 때마다 fcm 값을 새로 저장해줌
 
         return TokenResponseDto.builder()
                 .tokenType(ACCESS_TOKEN)
