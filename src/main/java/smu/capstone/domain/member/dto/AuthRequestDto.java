@@ -22,6 +22,8 @@ public class AuthRequestDto {
     public static class Login {
         String accountId;
         String password;
+
+        String fcmToken; // fcm 토큰 추가
     }
 
     @Getter
