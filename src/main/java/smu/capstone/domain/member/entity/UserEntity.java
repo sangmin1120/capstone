@@ -43,4 +43,5 @@ public class UserEntity extends BaseEntity {
     Authority authority;
 
     //다른 정보들 추가
+    String fcmToken;
 }

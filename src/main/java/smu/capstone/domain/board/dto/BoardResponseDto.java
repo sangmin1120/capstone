@@ -31,7 +31,7 @@ public class BoardResponseDto {
         UserEntity user = board.getUser();
         this.username = user.getUsername();
         this.email = user.getEmail();
-        this.imgUrl= user.getImgUrl();
+        this.imgUrl= board.getImgUrl();
         this.likeCount=board.getLikeCount();
     }
 }
