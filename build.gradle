@@ -76,6 +76,17 @@ dependencies {
 	//test 환경
 	testCompileOnly 'org.projectlombok:lombok'
 	testAnnotationProcessor 'org.projectlombok:lombok'
+
+	//fcm
+	implementation 'com.google.firebase:firebase-admin:9.1.1'
+	implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+	implementation 'com.google.auth:google-auth-library-oauth2-http:1.17.0'
+
+	//aws s3
+	implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.1.1'
+
+	//json
+	implementation 'org.json:json:20240303'
 }
 
 tasks.named('test') {
