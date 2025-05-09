@@ -32,6 +32,7 @@ public class BoardModifyService {
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
                 .boardType(requestDto.getBoardType())
+                .imgUrl(requestDto.getImgUrl())
                 .build();
 
         return boardRepository.save(board);

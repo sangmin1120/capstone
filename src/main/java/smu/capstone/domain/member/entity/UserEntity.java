@@ -34,6 +34,7 @@ public class UserEntity extends BaseEntity {
     String phoneNumber; // 010-1111-1111: String 형태로 저장
     String birth; // year.birth.day: String 형태로 저장
     String imgUrl;
+    String fcmToken; // fcmToken 추가 - 프론트 단에서 가져오기, 하나만 등록 가능
 
     @Enumerated(EnumType.STRING)
     UserType userType; // enum 으로 변경 ( 환자/간병인 )
@@ -42,4 +43,5 @@ public class UserEntity extends BaseEntity {
     Authority authority;
 
     //다른 정보들 추가
+    String fcmToken;
 }
