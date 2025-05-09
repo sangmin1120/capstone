@@ -45,7 +45,3 @@ data
 h2
 .docker
 Dockerfile
-docker-compose.yml
-
-# Ignore everything in resources
-src/main/resources/
