@@ -7,6 +7,12 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.NonNull;
 
+/**
+ * token, notification 형태로 전달
+ * @param targetToken
+ * @param title
+ * @param body
+ */
 @Builder(access = AccessLevel.PRIVATE)
 public record MessageNotification(
         @NonNull String targetToken,
