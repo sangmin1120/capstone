@@ -14,6 +14,9 @@ import smu.capstone.intrastructure.jwt.TokenType;
 
 import java.io.IOException;
 
+/**
+ * 들어오는 토큰을 filter
+ */
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;

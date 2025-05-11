@@ -58,19 +58,19 @@ public class TokenProvider {
     public String createAccessTokenByRefreshToken(String refreshToken) {
         Claims claims = parseTokenClaims(REFRESH_TOKEN, refreshToken);
         String userId = claims.getSubject();
-        String userid = claims.get(PAYLOAD_VALUE, String.class);
+        String accountId = claims.get(PAYLOAD_VALUE, String.class);
         String authority = claims.get(AUTHORITY_KEY).toString();
-        return createToken(REFRESH_TOKEN, Long.parseLong(userId), userid, authority);
+        return createToken(REFRESH_TOKEN, Long.parseLong(userId), accountId, authority);
     }
 
-    public String createToken(TokenType tokenType, Long userId, String userid, String authority) {
+    public String createToken(TokenType tokenType, Long userId, String accountId, String authority) {
         long nowMillisecond = new Date().getTime();
 
         return Jwts.builder()
                 .setIssuer("poodle")  //수정해야됨
                 .setSubject(userId.toString())
                 .setExpiration(new Date(nowMillisecond + tokenType.getValidMillisecond()))
-                .claim(PAYLOAD_VALUE, userid)
+                .claim(PAYLOAD_VALUE, accountId)
                 .claim(AUTHORITY_KEY, authority)
                 .signWith(getKey(tokenType), SignatureAlgorithm.HS256)
                 .compact();

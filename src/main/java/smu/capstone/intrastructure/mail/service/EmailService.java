@@ -12,6 +12,7 @@ import smu.capstone.intrastructure.mail.dto.EmailType;
 
 import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
+import java.util.Map;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.FAIL_TO_SEND_MAIL;
 
@@ -31,6 +32,7 @@ public class EmailService {
 
     private MimeMessage createMessage(EmailType type, String key) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
+
         try {
             mimeMessage.setSubject(type.getSubject());
             String msg = "";

@@ -41,8 +41,8 @@ public class LoginService {
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
 
 
-        String userid = authRequestDto.getAccountId();
-        UserEntity user = userRepository.findByAccountId(userid).orElseThrow(() ->
+        String accountId = authRequestDto.getAccountId();
+        UserEntity user = userRepository.findByAccountId(accountId).orElseThrow(() ->
                 new RestApiException(INVALID_ID_OR_PASSWORD));
 
         if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
@@ -50,11 +50,11 @@ public class LoginService {
         }
 
         // JWT token 처리
-        String accessToken = tokenProvider.createToken(ACCESS_TOKEN, user.getId(), userid, user.getAuthority().name());
+        String accessToken = tokenProvider.createToken(ACCESS_TOKEN, user.getId(), accountId, user.getAuthority().name());
         Authentication authentication = tokenProvider.createAuthenticationByAccessToken(accessToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        String refreshToken = tokenProvider.createToken(REFRESH_TOKEN, user.getId(), userid, user.getAuthority().name());
+        String refreshToken = tokenProvider.createToken(REFRESH_TOKEN, user.getId(), accountId, user.getAuthority().name());
         saveRefreshToken(refreshToken);
         setRefreshTokenCookie(response, refreshToken);
 
