@@ -13,6 +13,9 @@ import java.io.IOException;
 
 import static smu.capstone.common.errorcode.CommonStatusCode.FORBIDDEN;
 
+/**
+ * 접근 불가할 때,동작하는 클래스
+ */
 @Component
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
     private final ObjectMapper mapper = new ObjectMapper();
