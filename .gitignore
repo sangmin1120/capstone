@@ -45,5 +45,5 @@ data
 h2
 .docker
 
-### fcm ###
-*/resources
+# Ignore everything in resources
+src/main/resources/
