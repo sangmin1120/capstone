@@ -6,6 +6,7 @@ ARG JAR_FILE=/build/libs/*.jar
 
 #profile
 ENV USER_PROFILE dev
+ENV AWS_REGION ap-northeast-2
 
 #AWS
 ENV AWS_REGION=ap-northeast-2
