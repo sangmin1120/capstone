@@ -17,6 +17,8 @@ import smu.capstone.intrastructure.redis.domain.MailVerificationCache;
 import smu.capstone.intrastructure.redis.repository.MailVerificationCacheRepository;
 import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
 
+import java.util.Map;
+
 import static smu.capstone.common.errorcode.AuthExceptionCode.*;
 
 @Service
@@ -79,6 +81,7 @@ public class UserSearchService {
         userRepository.findByEmail(authRequestDto.getEmail())
                 .orElseThrow(()->new RestApiException(INVALID_ID_OR_PASSWORD));
 
-        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.PASSWORD_CODE_MAIL);
+        String key = CertificationKeyGenerator.generateStrongKey();
+        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.PASSWORD_CODE_MAIL, key);
     }
 }
