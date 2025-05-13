@@ -16,4 +16,7 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     @EntityGraph(attributePaths = "user")
     List<Schedule> findByAlertTimeBetweenAndAlertSentIsFalse(LocalDateTime start, LocalDateTime end);
 
+    @EntityGraph(attributePaths = "user")
+    List<Schedule> findByAlertTimeBeforeAndAlertSentIsFalse(LocalDateTime time);
+
 }
