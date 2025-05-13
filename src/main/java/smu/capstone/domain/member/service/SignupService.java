@@ -8,15 +8,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.common.util.CertificationKeyGenerator;
+import smu.capstone.domain.alarm.service.AlarmService;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.respository.UserRepository;
 import smu.capstone.intrastructure.mail.dto.EmailType;
 import smu.capstone.intrastructure.redis.domain.MailVerificationCache;
 import smu.capstone.intrastructure.redis.repository.MailVerificationCacheRepository;
-import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
-
-import java.util.Map;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.*;
 
@@ -32,7 +30,7 @@ public class SignupService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final MessageSender messageSender;
+    private final AlarmService alarmService;
 
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
@@ -58,7 +56,7 @@ public class SignupService {
             throw new RestApiException(DUPLICATED_MAIL);
         });
         String key = CertificationKeyGenerator.generateStrongKey();
-        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.SIGNUP_CODE_MAIL, key);
+        alarmService.sendAuth(authRequestDto.getEmail(), EmailType.SIGNUP_CODE_MAIL, key);
     }
 
     public void verifyMail(AuthRequestDto.@Valid VerificationMail authRequestDto) {
