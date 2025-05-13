@@ -1,4 +1,4 @@
-package smu.capstone.domain.fcm.dto;
+package smu.capstone.intrastructure.fcm.dto;
 
 import com.google.firebase.messaging.Notification;
 

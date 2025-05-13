@@ -1,11 +1,9 @@
-package smu.capstone.domain.fcm.dto;
+package smu.capstone.intrastructure.fcm.dto;
 
 import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
-import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.NonNull;
 
 /**
  * token, notification 형태로 전달
@@ -15,7 +13,7 @@ import lombok.NonNull;
  */
 @Builder(access = AccessLevel.PRIVATE)
 public record MessageNotification(
-        @NonNull String targetToken,
+        String targetToken,
         String title,
         String body
 ) implements NotificationRequest {

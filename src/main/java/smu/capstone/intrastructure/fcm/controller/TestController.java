@@ -1,14 +1,12 @@
-package smu.capstone.domain.fcm.controller;
+package smu.capstone.intrastructure.fcm.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import smu.capstone.common.response.BaseResponse;
-import smu.capstone.domain.fcm.service.TestService;
-import smu.capstone.domain.member.util.LoginUserUtil;
+import smu.capstone.intrastructure.fcm.service.TestService;
 
 import java.security.Principal;
 
