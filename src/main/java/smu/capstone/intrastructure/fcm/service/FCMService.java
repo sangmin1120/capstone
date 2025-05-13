@@ -1,16 +1,21 @@
-package smu.capstone.domain.fcm.service;
+package smu.capstone.intrastructure.fcm.service;
 
 
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
-import smu.capstone.domain.fcm.dto.MessageNotification;
-import smu.capstone.domain.fcm.dto.NotificationRequest;
+import smu.capstone.intrastructure.fcm.dto.MessageNotification;
+import smu.capstone.intrastructure.fcm.dto.NotificationRequest;
 
 import static smu.capstone.common.errorcode.FcmExceptionCode.FCM_SERVICE_UNAVAILABLE;
 
+/**
+ * token 값에 따라 notification 전송
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class FCMService {
@@ -19,6 +24,13 @@ public class FCMService {
 
     // 단일 메시지 처리 -> 메시지 title,body 만드는 메서드 만들기
     public void sendMessage(MessageNotification request) {
+
+        //Fcm 토큰 유효성 검사
+        if (request.targetToken()==null || request.targetToken().isEmpty()) {
+            log.info("[warn FCM] FCM token is Empty");
+            return;
+        }
+
         try {
             Message message = request.buildMessage()
                     .setApnsConfig(getApnsConfig(request)) // ios
