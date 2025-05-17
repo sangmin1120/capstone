@@ -8,6 +8,7 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.intrastructure.fcm.dto.MessageNotification;
+import smu.capstone.intrastructure.fcm.dto.NotificationMulticastRequest;
 import smu.capstone.intrastructure.fcm.dto.NotificationRequest;
 
 import static smu.capstone.common.errorcode.FcmExceptionCode.FCM_SERVICE_UNAVAILABLE;
@@ -42,17 +43,35 @@ public class FCMService {
         }
     }
 
-    // 여러 기기 전송
-    /*
+    // 여러 기기 전송 -> 테스트를 못해봄
     public void sendMessages(final NotificationMulticastRequest request) {
+
+        // 1. null 체크
+        if (request == null || request.targetTokens() == null || request.targetTokens().isEmpty()) {
+            log.warn("[FCM] 요청이 null이거나 FCM 토큰이 없습니다. 전송하지 않습니다.");
+            return;
+        }
+
         try {
-            val messages = request.buildSendMessage().setApnsConfig(getApnsConfig(request)).build();
-            firebaseMessaging.sendMulticastAsync(messages);
+            log.info("Fcm alarm start");
+
+//            MulticastMessage messages = request.buildSendMessage().setApnsConfig(getApnsConfig(request)).build();
+
+            for (String token : request.targetTokens()) {
+                Message message = Message.builder()
+                        .setNotification(request.toNotification())
+                        .setToken(token)
+                        .build();
+                firebaseMessaging.sendAsync(message);
+            } // -> 반복문으로 하면 되는데 sendMulticast은 동작을 안함
+//            firebaseMessaging.sendMulticast(messages);
+
+            log.info("Fcm alarm end");
         } catch (RuntimeException exception) {
-            throw new FcmException(FCM_SERVICE_UNAVAILABLE, exception.getMessage());
+            log.error("[FCM] 예외 발생: {}", exception.getMessage());
+            throw new RestApiException(FCM_SERVICE_UNAVAILABLE);
         }
     }
-     */
 
     /*
     // 웹 설정
