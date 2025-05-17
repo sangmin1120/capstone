@@ -1,22 +1,15 @@
 package smu.capstone.intrastructure.rabbitmq.config;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
+import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 // baseScan으로 스캔 범위를 적용해주어야 됨
 @Configuration
@@ -25,47 +18,48 @@ public class RabbitMQConfig {
     @Autowired
     private RabbitMQProperties rabbitMQProperties;
 
-    /**
-     * 지정된 큐 이름으로 Queue 빈을 생성
-     *
-     * @return Queue 빈 객체
-     */
-    @Bean
-    public List<Queue> queues() {
-        return rabbitMQProperties.getBindings().stream()
-                .map(binding -> new Queue(binding.getQueue().getName()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 지정된 익스체인지 이름으로 DirectExchange 빈을 생성
-     *
-     * @return TopicExchange 빈 객체
-     */
-    @Bean
-    public List<DirectExchange> exchanges() {
-        return rabbitMQProperties.getBindings().stream()
-                .map(binding -> new DirectExchange(binding.getExchange().getName()))
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * 주어진 큐와 익스체인지를 바인딩하고 라우팅 키를 사용하여 Binding 빈을 생성
-     *
-     * @return Binding 빈 객체
-     */
-    @Bean
-    public List<Binding> bindings(List<Queue> queues, List<DirectExchange> exchanges) {
-        return IntStream.range(0, rabbitMQProperties.getBindings().size())
-                .mapToObj(i -> {
-                    var binding = rabbitMQProperties.getBindings().get(i);
-                    return BindingBuilder
-                            .bind(queues.get(i))
-                            .to(exchanges.get(i))
-                            .with(binding.getRouting().getName());
-                })
-                .collect(Collectors.toList());
-    }
+//    /*
+//    /**
+//     * 지정된 큐 이름으로 Queue 빈을 생성
+//     *
+//     * @return Queue 빈 객체
+//     */
+//    @Bean
+//    public List<Queue> queues() {
+//        return rabbitMQProperties.getBindings().stream()
+//                .map(binding -> new Queue(binding.getQueue().getName()))
+//                .collect(Collectors.toList());
+//    }
+//
+//    /**
+//     * 지정된 익스체인지 이름으로 DirectExchange 빈을 생성
+//     *
+//     * @return TopicExchange 빈 객체
+//     */
+//    @Bean
+//    public List<DirectExchange> exchanges() {
+//        return rabbitMQProperties.getBindings().stream()
+//                .map(binding -> new DirectExchange(binding.getExchange().getName()))
+//                .collect(Collectors.toList());
+//    }
+//
+//    /**
+//     * 주어진 큐와 익스체인지를 바인딩하고 라우팅 키를 사용하여 Binding 빈을 생성
+//     *
+//     * @return Binding 빈 객체
+//     */
+//    @Bean
+//    public List<Binding> bindings(List<Queue> queues, List<DirectExchange> exchanges) {
+//        return IntStream.range(0, rabbitMQProperties.getBindings().size())
+//                .mapToObj(i -> {
+//                    var binding = rabbitMQProperties.getBindings().get(i);
+//                    return BindingBuilder
+//                            .bind(queues.get(i))
+//                            .to(exchanges.get(i))
+//                            .with(binding.getRouting().getName());
+//                })
+//                .collect(Collectors.toList());
+//    }
 
     /**
      * RabbitMQ 연결을 위한 ConnectionFactory 빈을 생성하여 반환
@@ -115,5 +109,12 @@ public class RabbitMQConfig {
         return factory;
     }
 
+    // 🧩 Spring이 queue, exchange, binding을 생성하지 않도록 설정
+    @Bean
+    public RabbitAdmin rabbitAdmin(ConnectionFactory connectionFactory) {
+        RabbitAdmin admin = new RabbitAdmin(connectionFactory);
+        admin.setAutoStartup(false); // ❗ 자동 등록 비활성화
+        return admin;
+    }
 }
 

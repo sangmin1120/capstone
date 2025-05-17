@@ -5,12 +5,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import smu.capstone.domain.fcm.dto.MessageNotification;
-import smu.capstone.domain.fcm.service.FCMService;
+import smu.capstone.domain.alarm.service.AlarmService;
+import smu.capstone.intrastructure.fcm.dto.MessageNotification;
 import smu.capstone.domain.schedule.domain.Schedule;
 import smu.capstone.domain.schedule.repository.ScheduleRepository;
-import smu.capstone.intrastructure.mail.dto.EmailType;
-import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -23,18 +21,17 @@ import java.util.Map;
 public class AlertScheduler {
 
     private final ScheduleRepository scheduleRepository;
-    private final FCMService fcmService;
-    private final MessageSender messageSender;
+    private final AlarmService alarmService;
 
     @Scheduled(fixedRate = 60000)
     @Transactional
     public void checkAndSendAlerts() {
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime from = now.minusSeconds(100);
-        LocalDateTime to = now.plusSeconds(100); // 알람 전송이 안됨
+//        LocalDateTime from = now.minusSeconds(100);
+//        LocalDateTime to = now.plusSeconds(100); // 알람 전송이 안됨
 
         // 아직 전송되지 않은 일정만 조회
-        List<Schedule> schedules = scheduleRepository.findByAlertTimeBetweenAndAlertSentIsFalse(from, to);
+        List<Schedule> schedules = scheduleRepository.findByAlertTimeBeforeAndAlertSentIsFalse(now);
 
         for (Schedule schedule : schedules) {
             try {
@@ -42,26 +39,22 @@ public class AlertScheduler {
                 String email = schedule.getUser().getEmail();
                 String fcmToken = schedule.getUser().getFcmToken();
 
-                // 메일 발송 - rabbitMQ로 변경
-                messageSender.sendMessage(email, EmailType.SCHEDULE_ALARM, getMap(schedule));
-//            scheduleMailService.sendScheduleAlert(email, schedule);
-//                System.out.println("Email sent: " + email);
-                if (fcmToken != null && !fcmToken.isBlank()) {
-                    fcmService.sendMessage(MessageNotification.of(fcmToken, "일정 알림", schedule.getTitle() + " 일정이 " + schedule.getStartTime() + " 에 시작됩니다!"));
-//                    webPushServiceFcm.sendPush(fcmToken, "일정 알림", schedule.getTitle() + " 일정이 " + schedule.getStartTime() + " 에 시작됩니다!");
-//                    System.out.println("FCM token sent: " + fcmToken);
-                }
+                // 알림 푸시
+                alarmService.sendSchedule(MessageNotification.of(
+                        fcmToken, "일정 알림", schedule.getTitle() + " 일정이 " + schedule.getStartTime() + " 에 시작됩니다!"),
+                        email,
+                        getMap(schedule));
+
                 // 중복 방지 플래그 true 로 설정
                 schedule.setAlertSent(true);
             } catch (Exception e) {
                 log.info("알림 전송 실패: {}", schedule.getId(), e);
             }
+            // 플래그 수정된 일정들 저장
             scheduleRepository.save(schedule);
         }
-        // 플래그 수정된 일정들 저장
-//        scheduleRepository.saveAll(schedules);
 
-        log.info("{}건의 일정 알림 전송 완료", schedules.size());
+//        log.info("{}건의 일정 알림 전송 완료", schedules.size());
     }
 
     private Map<String, String> getMap(Schedule schedule) {

@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
-import smu.capstone.domain.schedule.domain.Schedule;
 import smu.capstone.intrastructure.mail.dto.EmailType;
 import smu.capstone.intrastructure.rabbitmq.dto.AlarmMessageDto;
 
@@ -18,6 +17,9 @@ import java.util.Map;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.FAIL_TO_SEND_MAIL;
 
+/**
+ * 스케줄 이메일 알람 보내기
+ */
 @Service
 @RequiredArgsConstructor
 public class ScheduleMailService {

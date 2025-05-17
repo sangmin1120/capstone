@@ -3,10 +3,12 @@ package smu.capstone.domain.alarm.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import smu.capstone.intrastructure.fcm.dto.MessageNotification;
+import smu.capstone.intrastructure.fcm.dto.NotificationMulticastRequest;
 import smu.capstone.intrastructure.fcm.service.FCMService;
 import smu.capstone.intrastructure.mail.dto.EmailType;
 import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,4 +38,9 @@ public class AlarmService {
         messageSender.sendMessage(email, type, key);
     }
 
+    // 댓글에 대한 디바이스 푸시
+    public void sendMessages(NotificationMulticastRequest notifications) {
+
+        fcmService.sendMessages(notifications);
+    }
 }

@@ -5,6 +5,9 @@ import com.google.firebase.messaging.Notification;
 import lombok.AccessLevel;
 import lombok.Builder;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 /**
  * token, notification 형태로 전달
  * @param targetToken
@@ -29,7 +32,9 @@ public record MessageNotification(
     public Message.Builder buildMessage() {
         return Message.builder()
                 .setToken(targetToken)
-                .setNotification(toNotification());
+//                .setNotification(toNotification());
+                .putData("title", title)
+                .putData("body", body);
     }
 
     public Notification toNotification() {

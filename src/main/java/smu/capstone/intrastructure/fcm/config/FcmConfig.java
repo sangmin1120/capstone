@@ -28,28 +28,23 @@
             this.projectId = projectId;
         }
 
-        @PostConstruct
-        public void init() throws IOException {
-            FirebaseOptions option = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(firebaseResource.getInputStream()))
-                    .setProjectId(projectId)
-                    .build();
-
-            // FirebaseApp 인스턴스가 초기화되지 않은 경우 초기화, 이미 존재하는 경우 해당 인스턴스를 가져옴
-            FirebaseApp firebaseApp = FirebaseApp.getApps().isEmpty() ?
-                    FirebaseApp.initializeApp(option) :
-                    FirebaseApp.getInstance();
-
-            log.info("Firebase application has been initialized");
+        @Bean
+        public FirebaseApp firebaseApp() throws IOException {
+            // 이미 초기화된 FirebaseApp이 없으면 초기화
+            if (FirebaseApp.getApps().isEmpty()) {
+                FirebaseOptions options = FirebaseOptions.builder()
+                        .setCredentials(GoogleCredentials.fromStream(firebaseResource.getInputStream()))
+                        .setProjectId(projectId)
+                        .build();
+                return FirebaseApp.initializeApp(options);
+            } else {
+                return FirebaseApp.getInstance();
+            }
         }
 
         @Bean
-        FirebaseMessaging firebaseMessaging() {
-            return FirebaseMessaging.getInstance(firebaseApp());
+        public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp) {
+            return FirebaseMessaging.getInstance(firebaseApp);
         }
 
-        @Bean
-        FirebaseApp firebaseApp() {
-            return FirebaseApp.getInstance();
-        }
     }
