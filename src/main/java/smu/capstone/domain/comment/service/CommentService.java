@@ -54,13 +54,10 @@ public class CommentService {
         // 다른 사람들에게 알림
         List<String> fcmTokens = getFcmTokensByBoardId(boardId, user);
 
-        log.info("fcmTokens: {}", fcmTokens);
-
-        // 4. 알림 발송 (빈 토큰 리스트 방어)
+        // 4. 알림 발송
         if (!fcmTokens.isEmpty()) {
             String title = "댓글 알림";
             String body = "새로운 댓글: " + requestDto.getContent();
-            log.info("FCM tokens to notify: {}", fcmTokens);
             alarmService.sendMessages(NotificationMulticastRequest.of(fcmTokens, title, body));
         } else {
             log.info("FCM 알림 대상이 없습니다. 댓글만 저장됨.");
