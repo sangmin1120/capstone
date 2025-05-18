@@ -32,9 +32,9 @@ public record MessageNotification(
     public Message.Builder buildMessage() {
         return Message.builder()
                 .setToken(targetToken)
-//                .setNotification(toNotification());
-                .putData("title", title)
-                .putData("body", body);
+                .setNotification(toNotification());
+//                .putData("title", title)
+//                .putData("body", body);
     }
 
     public Notification toNotification() {

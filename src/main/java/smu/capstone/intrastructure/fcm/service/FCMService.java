@@ -53,20 +53,11 @@ public class FCMService {
         }
 
         try {
-            log.info("Fcm alarm start");
+            MulticastMessage messages = request.buildSendMessage()
+                    .setApnsConfig(getApnsConfig(request))
+                    .build();
+            firebaseMessaging.sendEachForMulticastAsync(messages);
 
-//            MulticastMessage messages = request.buildSendMessage().setApnsConfig(getApnsConfig(request)).build();
-
-            for (String token : request.targetTokens()) {
-                Message message = Message.builder()
-                        .setNotification(request.toNotification())
-                        .setToken(token)
-                        .build();
-                firebaseMessaging.sendAsync(message);
-            } // -> 반복문으로 하면 되는데 sendMulticast은 동작을 안함
-//            firebaseMessaging.sendMulticast(messages);
-
-            log.info("Fcm alarm end");
         } catch (RuntimeException exception) {
             log.error("[FCM] 예외 발생: {}", exception.getMessage());
             throw new RestApiException(FCM_SERVICE_UNAVAILABLE);
@@ -93,5 +84,16 @@ public class FCMService {
         val alert = ApsAlert.builder().setTitle(request.title()).setBody(request.body()).build();
         val aps = Aps.builder().setAlert(alert).setSound("default").build();
         return ApnsConfig.builder().setAps(aps).build();
+    }
+    // Android 설정
+    private AndroidConfig getAndroidConfig(NotificationRequest request) {
+        return AndroidConfig.builder()
+                .setNotification(
+                        AndroidNotification.builder()
+                                .setTitle(request.title())
+                                .setBody(request.body())
+                                .setClickAction("push_click")
+                                .build()
+                ).build();
     }
 }
