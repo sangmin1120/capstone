@@ -4,7 +4,6 @@ import com.google.firebase.messaging.MulticastMessage;
 import com.google.firebase.messaging.Notification;
 import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.NonNull;
 
 import java.util.List;
 
@@ -25,9 +24,9 @@ public record NotificationMulticastRequest(
 
     public MulticastMessage.Builder buildSendMessage() {
         return MulticastMessage.builder()
-//                .setNotification(toNotification())
-                .putData("title", title)
-                .putData("body", body)
+                .setNotification(toNotification())
+//                .putData("title", title)
+//                .putData("body", body)
                 .addAllTokens(targetTokens);
     }
 
