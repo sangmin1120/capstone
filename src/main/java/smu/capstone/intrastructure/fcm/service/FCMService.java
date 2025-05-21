@@ -11,6 +11,8 @@ import smu.capstone.intrastructure.fcm.dto.MessageNotification;
 import smu.capstone.intrastructure.fcm.dto.NotificationMulticastRequest;
 import smu.capstone.intrastructure.fcm.dto.NotificationRequest;
 
+import java.util.concurrent.Future;
+
 import static smu.capstone.common.errorcode.FcmExceptionCode.FCM_SERVICE_UNAVAILABLE;
 
 /**
@@ -37,8 +39,10 @@ public class FCMService {
                     .setApnsConfig(getApnsConfig(request)) // ios
 //                    .setWebpushConfig(getWebpushConfig(request)) // 웹 푸시용 추가
                     .build();
+            //Future로 잡아서 FirebaseException 중 token 만료 핸들링 필요
             firebaseMessaging.sendAsync(message);
-        } catch (RuntimeException exception) {
+        }catch (RuntimeException exception) {
+            log.error("[FCM] 예외 발생: {}", exception.getMessage());
             throw new RestApiException(FCM_SERVICE_UNAVAILABLE);
         }
     }
