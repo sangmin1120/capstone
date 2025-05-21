@@ -11,7 +11,6 @@ import smu.capstone.domain.schedule.dto.ScheduleRequestDto;
 import smu.capstone.domain.schedule.dto.ScheduleResponseDto;
 import smu.capstone.domain.schedule.repository.ScheduleRepository;
 
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;

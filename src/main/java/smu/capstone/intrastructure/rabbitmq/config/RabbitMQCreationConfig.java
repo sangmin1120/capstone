@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.util.List;
 
-@Configuration
+//@Configuration
 public class RabbitMQCreationConfig {
 
     // AmpqAdmin -> 기능들을 등록

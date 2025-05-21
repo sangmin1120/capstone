@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import smu.capstone.domain.schedule.domain.Schedule;
 
-
 import java.time.LocalDateTime;
 
 @Getter

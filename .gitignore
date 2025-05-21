@@ -44,6 +44,8 @@ rabbitmq-data
 data
 h2
 .docker
+Dockerfile
+docker-compose.yml
 
-### fcm ###
-*/resources
+# Ignore everything in resources
+src/main/resources/

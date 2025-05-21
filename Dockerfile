@@ -6,6 +6,10 @@ ARG JAR_FILE=/build/libs/*.jar
 
 #profile
 ENV USER_PROFILE dev
+ENV AWS_REGION ap-northeast-2
+
+#AWS
+ENV AWS_REGION=ap-northeast-2
 
 #작업 디렉토리 설정
 WORKDIR /app

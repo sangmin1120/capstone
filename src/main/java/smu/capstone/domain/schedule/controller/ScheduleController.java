@@ -8,7 +8,6 @@ import smu.capstone.domain.schedule.dto.ScheduleRequestDto;
 import smu.capstone.domain.schedule.dto.ScheduleResponseDto;
 import smu.capstone.domain.schedule.service.ScheduleService;
 
-
 import java.time.LocalDate;
 import java.util.List;
 

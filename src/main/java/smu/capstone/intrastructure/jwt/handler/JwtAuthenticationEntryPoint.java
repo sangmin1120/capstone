@@ -13,6 +13,9 @@ import smu.capstone.common.response.BaseResponse;
 import java.io.IOException;
 
 
+/**
+ * 인증 예외가 발생했을 때, 실행되는 클래스
+ */
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     private final ObjectMapper mapper = new ObjectMapper();
