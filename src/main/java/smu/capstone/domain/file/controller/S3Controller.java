@@ -2,17 +2,15 @@ package smu.capstone.domain.file.controller;
 
 import lombok.RequiredArgsConstructor;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import smu.capstone.common.errorcode.CommonStatusCode;
-import smu.capstone.common.exception.RestApiException;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import smu.capstone.common.response.BaseResponse;
-import smu.capstone.domain.file.dto.UrlResponseDto;
 import smu.capstone.domain.file.service.S3Service;
 
 import java.util.Map;
 
-@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/files")
@@ -22,9 +20,9 @@ public class S3Controller {
 
     ///file을 domain별 관리할지 별도 관리할지 확인필요
     /// board와 profile의 경우 별도 key 저장 필요 없으며 url로 접근 가능
-    @GetMapping("/upload-url/{type}")
-    public BaseResponse<UrlResponseDto> getPresignedUploadUrl(@PathVariable String type, @RequestParam String filename) {
-        return BaseResponse.ok(s3Service.createUploadPresignedUrl(type, filename));
+    @GetMapping("/upload-url")
+    public BaseResponse<Map<String, String>> getPresignedUploadUrl(@RequestParam String prefix, @RequestParam String filename) {
+        return BaseResponse.ok(s3Service.createUploadPresignedUrl(prefix, filename));
     }
 
     //파일 접근 api

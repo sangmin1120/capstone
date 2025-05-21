@@ -24,7 +24,6 @@ public class ChatRoomController {
     private final ChatRoomService chatRoomService;
 
     //채팅방 조회
-    //userId의 경우 UserEntity의 id로 구현, userId(String)가 아님 주의
     @GetMapping("/list")
     public BaseResponse<List<ChatRoomDto>> getChatRoomList() {
         List<ChatRoomDto> chatRoomList = chatRoomService.getChatRoomList();
@@ -41,7 +40,6 @@ public class ChatRoomController {
     //채팅방 입장
     @GetMapping("/enter/{chatRoomId}")
     public ResponseEntity<ChatRoomResponse<ChatRoomEnterDto>> enterChatRoom(@PathVariable("chatRoomId") String chatRoomId) {
-
         //상대가 존재하지 않으면 null 값으로 반환
         ChatRoomEnterDto chatRoomEnterDto = chatRoomService.enterChatRoom(chatRoomId);
         return ChatRoomResponse.ok(CommonStatusCode.OK, chatRoomEnterDto);
