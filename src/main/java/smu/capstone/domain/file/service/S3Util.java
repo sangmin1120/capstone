@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import smu.capstone.domain.file.dto.UrlResponseDto;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
@@ -15,8 +14,10 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,8 +26,6 @@ public class S3Util {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
-    @Value("${cloud.aws.s3.baseurl}")
-    private String baseUrl;
     private final S3Presigner s3Presigner;
 
     /***
@@ -35,13 +34,9 @@ public class S3Util {
      * @param filename filename
      * @return put url
      */
-    public UrlResponseDto createPutPresignedUrl(String prefix, String filename){
+    public Map<String,String> createPutPresignedUrl(String prefix, String filename){
         //Key(Path) 생성
         String key = createFilePath(prefix, filename);
-        //한글 파일 이름을 utf-8로 인코딩, url 생성 key에는 encoding한 key를 넣지 않음
-        String encodedKey = Arrays.stream(key.split("/"))
-                .map(part -> URLEncoder.encode(part, StandardCharsets.UTF_8).replace("+", "%20"))
-                .collect(Collectors.joining("/"));
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -54,12 +49,11 @@ public class S3Util {
         String url = s3Presigner.presignPutObject(putPresignedRequest).url().toString();
 
         //URL과 key 반환
-        UrlResponseDto urlResponseDto = new UrlResponseDto().builder()
-                .presignedUrl(url)
-                .accessUrl(String.format("%s/%s",baseUrl, encodedKey))
-                .key(key)
-                .build();
-        return urlResponseDto;
+        Map<String, String> urlMap = new HashMap<>();
+        urlMap.put("fileKey", key);
+        urlMap.put("fileUrl", url);
+
+        return urlMap;
     }
 
     /***
@@ -87,14 +81,13 @@ public class S3Util {
      * @return 3분동안 유효한 다운로드 presigned Url 반환 (파일에 사용)
      */
     public String createDownloadPresignedUrl(String key){
-        //다운 시에도 UTF-8로 Key 변환 필요
-        String encodedFilename = URLEncoder.encode(extractFilename(key), StandardCharsets.UTF_8)
+        //한글 파일 encoding 문제로 설정
+        String encodedFileName = URLEncoder.encode(key, StandardCharsets.UTF_8)
                 .replaceAll("\\+", "%20");
-
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucket)
                 .key(key)
-                .responseContentDisposition("attachment; filename*=UTF-8''" + encodedFilename)
+                .responseContentDisposition("attachment; filename*=UTF-8''" + encodedFileName)
                 .build();
         GetObjectPresignRequest downloadPresignedRequest = GetObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofMinutes(3))
@@ -114,9 +107,5 @@ public class S3Util {
     private String createFilePath(String prefix, String filename){
         String filePath = UUID.randomUUID() + filename;
         return String.format("%s/%s", prefix, filePath);
-    }
-
-    private String extractFilename(String key){
-        return key.substring(key.lastIndexOf('/') + 1);
     }
 }
