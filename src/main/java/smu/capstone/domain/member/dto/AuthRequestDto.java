@@ -82,4 +82,29 @@ public class AuthRequestDto {
     public static class DupAccountId {
         String accountId;
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class UserInfo {
+        String accountId;
+        String email;
+        String username;
+        String phoneNumber; // 010-1111-1111
+        String birth; // 생년월일 year.month.day
+        UserType userType;
+
+        public UserInfo toInfo(UserEntity userEntity) {
+            return UserInfo.builder()
+                    .accountId(userEntity.getAccountId())
+                    .email(userEntity.getEmail())
+                    .username(userEntity.getUsername())
+                    .phoneNumber(userEntity.getPhoneNumber())
+                    .birth(userEntity.getBirth())
+                    .userType(userEntity.getUserType())
+                    .build();
+        }
+    }
 }

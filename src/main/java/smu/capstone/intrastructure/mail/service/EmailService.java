@@ -11,8 +11,6 @@ import smu.capstone.common.exception.RestApiException;
 import smu.capstone.intrastructure.mail.dto.EmailType;
 
 import java.io.UnsupportedEncodingException;
-import java.security.SecureRandom;
-import java.util.Map;
 
 import static smu.capstone.common.errorcode.AuthExceptionCode.FAIL_TO_SEND_MAIL;
 
@@ -51,7 +49,7 @@ public class EmailService {
     private void sendMail(MimeMessage mimeMessage, String targetEmail) {
         try {
             mimeMessage.addRecipients(MimeMessage.RecipientType.TO, targetEmail);
-            mimeMessage.setFrom(new InternetAddress(username, "RehaLink"));
+            mimeMessage.setFrom(new InternetAddress(username, "RehabLink"));
             javaMailSender.send(mimeMessage);
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RestApiException(FAIL_TO_SEND_MAIL);
