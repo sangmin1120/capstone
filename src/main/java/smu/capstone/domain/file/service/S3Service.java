@@ -2,9 +2,12 @@ package smu.capstone.domain.file.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.errorcode.CommonStatusCode;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.domain.file.dto.UrlResponseDto;
+
 import java.util.Map;
 
 @Slf4j
@@ -16,9 +19,15 @@ public class S3Service {
 
     private final S3Util s3Util;
 
-    public Map<String, String> createUploadPresignedUrl(String prefix, String filename){
+    public UrlResponseDto createUploadPresignedUrl(String type, String filename){
+        String prefix = switch (type){
+            case "board" -> "board";
+            case "profile" -> "profile";
+            case "chat" -> "chat";
+            default -> throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+        };
         //파일 확장자 검사
-        if(prefix == null || filename == null){
+        if(filename == null){
             throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
         }
         if(!validationFilename(prefix, filename)){
