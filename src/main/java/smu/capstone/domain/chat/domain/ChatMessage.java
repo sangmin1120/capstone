@@ -23,7 +23,7 @@ public class ChatMessage {
     private String id;
     private String chatRoomId;
     private String message;
-    private String sender;
+    private String sender;  //AccountId로 에러메시지 전송하므로.. AccountId 값을 넣어야 함
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime sentAt;

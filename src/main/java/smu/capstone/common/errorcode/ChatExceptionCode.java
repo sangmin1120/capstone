@@ -18,6 +18,7 @@ public enum ChatExceptionCode {
     MESSAGE_SENDING_FAILED("C4020","메시지 전송에 실패하였습니다."),
     MESSAGE_SAVE_FAILED("C4020", "메시지 저장에 실패했습니다."),
     DATA_BIND_ERROR("C4020","메시지 포맷 처리에 문제가 생겼습니다."),
+    CHATROOM_STATE_UPDATE_ERROR("C4021", "메시지 전송으로 인한 채팅방 상태 업데이트에 실패했습니다."),
 
     IO_ERROR("C4030","메시지 처리과정에서 입출력 오류가 발생하였습니다."),
     INTERNAL_SERVER_ERROR("C4040", "서버 내부 오류");
