@@ -1,23 +1,22 @@
 package smu.capstone.domain.member.service;
 
-import jakarta.mail.Message;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.common.util.CertificationKeyGenerator;
-import smu.capstone.domain.member.entity.UserEntity;
+import smu.capstone.domain.alarm.service.AlarmService;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.dto.UserSearchDto;
+import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
-import smu.capstone.intrastructure.mail.service.EmailService;
 import smu.capstone.intrastructure.mail.dto.EmailType;
 import smu.capstone.intrastructure.redis.domain.MailVerificationCache;
 import smu.capstone.intrastructure.redis.repository.MailVerificationCacheRepository;
-import smu.capstone.intrastructure.rabbitmq.messaging.MessageSender;
 
-import static smu.capstone.common.errorcode.AuthExceptionCode.*;
+import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASSWORD;
+import static smu.capstone.common.errorcode.AuthExceptionCode.NOT_VERIFIED_MAIL;
 
 @Service
 @RequiredArgsConstructor
@@ -28,9 +27,8 @@ public class UserSearchService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailVerificationCacheRepository mailVerificationCacheRepository;
-    private final EmailService emailService;
 
-    private final MessageSender messageSender;
+    private final AlarmService alarmService;
 
     //accountId 찾기
     public String searchId(UserSearchDto.SearchIdRequest searchIdRequest) {
@@ -66,8 +64,7 @@ public class UserSearchService {
 
         //새로운 비밀번호 전송
         String newPassword = CertificationKeyGenerator.generateStrongKey();
-        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.PASSWORD_RESET, newPassword);
-//                emailService.sendCertificationKey(authRequestDto.getEmail(), EmailType.PASSWORD_RESET);
+        alarmService.sendAuth(authRequestDto.getEmail(), EmailType.PASSWORD_RESET, newPassword);
         // 비밀번호 변경
         userEntity.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(userEntity);
@@ -77,8 +74,9 @@ public class UserSearchService {
     public void sendVerificationMail(AuthRequestDto.@Valid VerificationMail authRequestDto) {
 
         userRepository.findByEmail(authRequestDto.getEmail())
-                .orElseThrow(()->new RestApiException(INVALID_ID_OR_PASSWORD));
+                .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
 
-        messageSender.sendMessage(authRequestDto.getEmail(), EmailType.PASSWORD_CODE_MAIL);
+        String key = CertificationKeyGenerator.generateStrongKey();
+        alarmService.sendAuth(authRequestDto.getEmail(), EmailType.PASSWORD_CODE_MAIL, key);
     }
 }

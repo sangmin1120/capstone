@@ -1,12 +1,11 @@
-package smu.capstone.domain.fcm.service;
+package smu.capstone.intrastructure.fcm.service;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
-import smu.capstone.domain.fcm.dto.MessageNotification;
+import smu.capstone.intrastructure.fcm.dto.MessageNotification;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
 
