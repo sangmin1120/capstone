@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 import smu.capstone.common.response.BaseResponse;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.dto.TokenResponseDto;
+import smu.capstone.domain.member.entity.UserEntity;
+import smu.capstone.domain.member.service.InfoService;
 import smu.capstone.domain.member.service.LoginService;
 import smu.capstone.domain.member.service.SignupService;
 import smu.capstone.intrastructure.jwt.service.TokenService;
@@ -22,6 +24,7 @@ public class AuthController {
     private final SignupService signupService;
     private final LoginService loginService;
     private final TokenService tokenService;
+    private final InfoService infoService;
 
     @PostMapping("/signup")
     public BaseResponse<Void> signup(@RequestBody AuthRequestDto.SignUp authRequestDto) {
@@ -66,5 +69,11 @@ public class AuthController {
         signupService.dupAccountId(authRequestDto);
 
         return BaseResponse.ok();
+    }
+
+    @PostMapping("/my-info")
+    public BaseResponse<AuthRequestDto.UserInfo> myInfo() {
+        AuthRequestDto.UserInfo userInfo = new AuthRequestDto.UserInfo();
+        return BaseResponse.ok(userInfo.toInfo(infoService.getCurrentUser()));
     }
 }
