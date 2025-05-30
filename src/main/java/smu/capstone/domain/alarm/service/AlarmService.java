@@ -43,4 +43,9 @@ public class AlarmService {
 
         fcmService.sendMessages(notifications);
     }
+
+    //새 채팅 메시지에 대한 디바이스 푸시
+    public void sendMessage(MessageNotification notification) {
+        fcmService.sendMessage(notification);
+    }
 }
