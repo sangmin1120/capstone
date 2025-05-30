@@ -1,5 +1,6 @@
 package smu.capstone.common.exception;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,8 +12,11 @@ import smu.capstone.common.response.BaseResponse;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(RestApiException.class)
-    public BaseResponse<Void> handleCustomException(RestApiException restApiException){
+    public BaseResponse<Void> handleCustomException(RestApiException restApiException, HttpServletResponse response){
+
+        response.setStatus(restApiException.getStatusCode().status().value());
         return BaseResponse.fail(restApiException);
     }
 
