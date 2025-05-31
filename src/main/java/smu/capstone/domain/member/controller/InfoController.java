@@ -27,5 +27,10 @@ public class InfoController {
         return BaseResponse.ok();
     }
 
-    //
+    // 내 정보 반환
+    @PostMapping("/my-info")
+    public BaseResponse<AuthRequestDto.UserInfo> myInfo() {
+        AuthRequestDto.UserInfo userInfo = new AuthRequestDto.UserInfo();
+        return BaseResponse.ok(userInfo.toInfo(infoService.getCurrentUser()));
+    }
 }
