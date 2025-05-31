@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import smu.capstone.common.errorcode.ChatExceptionCode;
+import smu.capstone.domain.alarm.service.AlarmService;
 import smu.capstone.domain.chat.domain.ChatMessage;
 import smu.capstone.domain.chat.exception.ChatException;
 import smu.capstone.domain.chat.repository.ChatMessageRepository;
@@ -17,7 +18,10 @@ import smu.capstone.domain.chatroom.repository.ChatRoomUserRepository;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
 import smu.capstone.intrastructure.chatting.util.RedisSessionManager;
+import smu.capstone.intrastructure.fcm.dto.MessageNotification;
+import smu.capstone.intrastructure.fcm.dto.NotificationMulticastRequest;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -30,6 +34,7 @@ public class AsyncChatMessageService {
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final AlarmService alarmService;
 
     @Async
     @Transactional
@@ -63,6 +68,14 @@ public class AsyncChatMessageService {
             UserEntity user = userRepository.findByAccountId(message.getSender()).orElseThrow( // 이부분 sender --------------------- AccountId를 넣어줘야됨
                     () -> new ChatException(ChatExceptionCode.USER_NOT_FOUND));
             ChatRoomUser other = ChatRoomUserPair.getPair(user.getId(), chatRoomUserList).getOtherChatRoomUser();
+
+            //다중 기기 알람 구현 시 for로 token list 조회 필요
+            //토큰 얻음
+            String alramToken = other.getUserEntity().getFcmToken();
+
+            //알림 메시지 생성 후 전송
+            alarmService.sendMessage(MessageNotification.of(alramToken,
+                    "새 채팅", message.getSender()+"님이 보낸 채팅입니다."));
 
             if(other.getActivation().equals(ChatRoomUser.Activation.INACTIVE)){
                 other.setActivation(ChatRoomUser.Activation.ACTIVE);

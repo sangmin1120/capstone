@@ -26,7 +26,7 @@ public class RedisSessionManager {
         redisTemplate.opsForHash().put(roomId, username, sessionId);
         redisTemplate.opsForHash().put(REDIS_SESSION_KEY, sessionId, roomId+":"+username);
         //1일 TTL 설정
-        redisTemplate.expire(roomId, Duration.ofDays(1));
+        //redisTemplate.expire(roomId, Duration.ofDays(1));
     }
 
     public String getHashValue(String key, String hashKey){
