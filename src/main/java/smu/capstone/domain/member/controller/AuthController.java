@@ -70,10 +70,4 @@ public class AuthController {
 
         return BaseResponse.ok();
     }
-
-    @PostMapping("/my-info")
-    public BaseResponse<AuthRequestDto.UserInfo> myInfo() {
-        AuthRequestDto.UserInfo userInfo = new AuthRequestDto.UserInfo();
-        return BaseResponse.ok(userInfo.toInfo(infoService.getCurrentUser()));
-    }
 }
