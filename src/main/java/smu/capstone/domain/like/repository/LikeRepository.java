@@ -17,6 +17,7 @@ public interface LikeRepository extends JpaRepository<Like, Long> {
     // 특정 유저가 특정 게시글에 좋아요를 눌렀다면 해당 엔티티 삭제
     void deleteByUserAndBoard(UserEntity user, Board board);
 
+    void deleteByBoard(Board board);
 
 }
 

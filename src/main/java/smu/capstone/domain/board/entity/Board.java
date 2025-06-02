@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import smu.capstone.domain.board.dto.BoardRequestDto;
 import smu.capstone.common.domain.BaseEntity;
+import smu.capstone.domain.comment.entity.Comment;
 import smu.capstone.domain.member.entity.UserEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "boards")
@@ -34,9 +38,17 @@ public class Board extends BaseEntity {
     @Column(nullable = false)
     private BoardType boardType; // 게시판 종류 (MATCHING, MARKET, FREE)
 
+    @Column(nullable = true)
     private String imgUrl;
 
+    @Column(nullable = true)
+    private Long price; // BoardType==MARKET 일때만 사용
+
     private int likeCount; // 좋아요 수 추가
+
+    @Builder.Default
+    @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     public void increaseLike() {
         this.likeCount++;

@@ -20,11 +20,11 @@ public class CommentController {
 
     private final CommentService commentService;
 
+
     //  댓글 작성
     @PostMapping
     public BaseResponse<CommentResponseDto> addComment(@PathVariable("boardId") Long boardId,
                                                        @RequestBody CommentRequestDto requestDto) {
-
         Long userId = getLoginMemberId();
         CommentResponseDto response = commentService.addComment(boardId, userId, requestDto);
         return BaseResponse.ok(response);
@@ -43,5 +43,12 @@ public class CommentController {
         Long userId = getLoginMemberId();
         commentService.deleteComment(commentId, userId);
         return BaseResponse.ok("댓글이 삭제되었습니다.");
+    }
+
+    @PutMapping("/{commentId}")
+    public BaseResponse<String> updateComment(@PathVariable("boardId") Long boardId, @PathVariable("commentId") Long commentId,  @RequestBody CommentRequestDto requestDto) {
+        Long userId = getLoginMemberId();
+        commentService.updateComment(commentId, userId, requestDto);
+        return BaseResponse.ok("댓글이 수정되었습니다.");
     }
 }

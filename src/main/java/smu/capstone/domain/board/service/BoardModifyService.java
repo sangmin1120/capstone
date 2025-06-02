@@ -5,12 +5,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.board.entity.Board;
+import smu.capstone.domain.board.entity.BoardType;
 import smu.capstone.domain.board.repository.BoardRepository;
 import smu.capstone.domain.board.dto.BoardRequestDto;
+import smu.capstone.domain.comment.repository.CommentRepository;
+import smu.capstone.domain.like.repository.LikeRepository;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.service.InfoService;
-
-import java.util.Optional;
 
 import static smu.capstone.common.errorcode.CommonStatusCode.*;
 
@@ -20,6 +21,8 @@ public class BoardModifyService {
 
     private final BoardRepository boardRepository;
     private final InfoService infoService;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public Board createBoard(BoardRequestDto requestDto) {
@@ -27,42 +30,63 @@ public class BoardModifyService {
         UserEntity currentUser = infoService.getCurrentUser();
 
         // 게시글 생성
-        Board board = Board.builder()
-                .user(currentUser)
-                .title(requestDto.getTitle())
-                .content(requestDto.getContent())
-                .boardType(requestDto.getBoardType())
-                .imgUrl(requestDto.getImgUrl())
-                .build();
+        Board board = new Board();
+        board.setUser(currentUser);
+        board.setTitle(requestDto.getTitle());
+        board.setContent(requestDto.getContent());
+        board.setBoardType(requestDto.getBoardType());
+        board.setImgUrl(requestDto.getImgUrl());
+
+        // BoardType이 MARKET이면 price 설정
+        if (requestDto.getBoardType() == BoardType.MARKET) {
+            board.setPrice(requestDto.getPrice());
+        }
 
         return boardRepository.save(board);
     }
 
     public void updateBoard(Long boardId, BoardRequestDto requestDto) {
-
         UserEntity currentUser = infoService.getCurrentUser();
-        Optional<Board> board = boardRepository.findById(boardId);
-        if (!currentUser.equals(board.get().getUser())) {
-            throw new RestApiException(NOT_FOUND_BOARD_ID);
-        }
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
 
-        //수정할 부분: 업데이트 부분
-        Board updated = board.get().update(requestDto);
-        boardRepository.save(updated);
-    }
-
-    public void deleteBoard(Long id) {
-        UserEntity currentUser = infoService.getCurrentUser();
-        Optional<Board> board = boardRepository.findById(id);
-
-        // 게시글의 주인이 아니면 삭제 불가
-        if (!board.get().getUser().equals(currentUser)) {
+        if (!currentUser.equals(board.getUser())) {
             throw new RestApiException(FORBIDDEN);
         }
 
-        if (board.isPresent()) {
-            boardRepository.delete(board.get());
+        board.setTitle(requestDto.getTitle());
+        board.setContent(requestDto.getContent());
+        board.setBoardType(requestDto.getBoardType());
+        board.setImgUrl(requestDto.getImgUrl());
+
+        if (requestDto.getBoardType() == BoardType.MARKET) {
+            board.setPrice(requestDto.getPrice());
+        } else {
+            board.setPrice(null); // 다른 게시판 유형일 경우 price 초기화
         }
+
+        boardRepository.save(board);
     }
+
+
+    @Transactional
+    public void deleteBoard(Long id) {
+        UserEntity currentUser = infoService.getCurrentUser();
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
+
+        // 작성자 확인
+        if (!board.getUser().equals(currentUser)) {
+            throw new RestApiException(FORBIDDEN);
+        }
+        // 나중에 수정할 필요 있음
+        // 1. 관련 댓글 삭제
+        commentRepository.deleteByBoard(board);
+        // 2. 관련 좋아요 삭제
+        likeRepository.deleteByBoard(board);
+        // 3. 게시글 삭제
+        boardRepository.delete(board);
+    }
+
 }
 
