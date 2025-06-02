@@ -10,6 +10,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.core.Queue;
 
 // baseScan으로 스캔 범위를 적용해주어야 됨
 @Configuration
@@ -115,6 +116,12 @@ public class RabbitMQConfig {
         RabbitAdmin admin = new RabbitAdmin(connectionFactory);
         admin.setAutoStartup(false); // ❗ 자동 등록 비활성화
         return admin;
+    }
+
+    // 준성
+    @Bean
+    public Queue emailAuthQueue() {
+        return new Queue("email.auth.queue", true); // durable = true
     }
 }
 
