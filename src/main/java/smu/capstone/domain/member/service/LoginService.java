@@ -98,9 +98,22 @@ public class LoginService {
     private void setRefreshTokenCookieWhenProd(HttpServletResponse response, Cookie cookie) {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setDomain("rehab.me");
         cookie.setSecure(true);
-        response.addCookie(cookie);
+        cookie.setDomain("smu-rehab.duckdns.org");
+
+        int maxAge = cookie.getMaxAge();
+        String encodedValue = cookie.getValue(); // 이미 URLEncoded 상태여야 함
+
+        // 직접 Set-Cookie 헤더 작성 (SameSite=None 필수)
+        String setCookieHeader = String.format(
+                "%s=%s; Max-Age=%d; Path=/; Domain=%s; Secure; HttpOnly; SameSite=None",
+                cookie.getName(),
+                encodedValue,
+                maxAge,
+                cookie.getDomain()
+        );
+
+        response.addHeader("Set-Cookie", setCookieHeader);
     }
 
     private void setRefreshTokenCookieWhenLocal(HttpServletResponse response, Cookie cookie) {
