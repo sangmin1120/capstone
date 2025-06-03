@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -13,10 +14,12 @@ import smu.capstone.intrastructure.jwt.service.TokenProvider;
 import smu.capstone.intrastructure.jwt.TokenType;
 
 import java.io.IOException;
+import java.util.Enumeration;
 
 /**
  * 들어오는 토큰을 filter
  */
+@Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
@@ -42,7 +45,8 @@ public class JwtFilter extends OncePerRequestFilter {
             Authentication authentication = tokenProvider.createAuthenticationByAccessToken(accessToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
-        catch (RestApiException ignored) {
+        catch (RestApiException e) {
+            log.info("[JwtFilter] Token validation failed: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
