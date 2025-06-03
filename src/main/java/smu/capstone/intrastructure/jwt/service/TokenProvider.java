@@ -112,11 +112,15 @@ public class TokenProvider {
     }
 
     public String getAccessToken(HttpServletRequest request) {
-        String token = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)).orElseThrow(() ->
-                new RestApiException(AUTHORIZATION_REQUIRED)
-        );
+        String token = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)).
+                orElse(request.getHeader("authorization"));
+        System.out.println("[getAccessToken]" + token);
 
-        if (!StringUtils.hasText(token) || !StringUtils.startsWithIgnoreCase(token, TOKEN_TYPE)) {
+        if (!StringUtils.hasText(token)) {
+            throw new RestApiException(AUTHORIZATION_REQUIRED);
+        }
+
+        if (!StringUtils.startsWithIgnoreCase(token, TOKEN_TYPE)) {
             throw new RestApiException(INVALID_TOKEN);
         }
 
