@@ -59,7 +59,7 @@ public class BaseResponse<T> {
                 .build();
     }
 
-    public static <T> BaseResponse<T> fail(RestApiException restApiException) {
+    public static <T> BaseResponse<T    > fail(RestApiException restApiException) {
         return BaseResponse.<T>builder()
                 .statusCode(restApiException.getStatusCode())
                 .build();

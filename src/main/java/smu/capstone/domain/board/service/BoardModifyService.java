@@ -9,9 +9,12 @@ import org.springframework.stereotype.Service;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.board.entity.Board;
 import smu.capstone.domain.board.event.BoardImageEvent;
+import smu.capstone.domain.board.entity.BoardType;
 import smu.capstone.domain.board.repository.BoardRepository;
 import smu.capstone.domain.board.dto.BoardRequestDto;
 import smu.capstone.domain.file.service.S3Service;
+import smu.capstone.domain.comment.repository.CommentRepository;
+import smu.capstone.domain.like.repository.LikeRepository;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.service.InfoService;
 
@@ -28,6 +31,8 @@ public class BoardModifyService {
     private final InfoService infoService;
     private final ApplicationEventPublisher publisher;
     private final S3Service s3Service;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public Board createBoard(BoardRequestDto requestDto) {
@@ -35,13 +40,17 @@ public class BoardModifyService {
         UserEntity currentUser = infoService.getCurrentUser();
 
         // 게시글 생성
-        Board board = Board.builder()
-                .user(currentUser)
-                .title(requestDto.getTitle())
-                .content(requestDto.getContent())
-                .boardType(requestDto.getBoardType())
-                .imgUrl(requestDto.getImgUrl())
-                .build();
+        Board board = new Board();
+        board.setUser(currentUser);
+        board.setTitle(requestDto.getTitle());
+        board.setContent(requestDto.getContent());
+        board.setBoardType(requestDto.getBoardType());
+        board.setImgUrl(requestDto.getImgUrl());
+
+        // BoardType이 MARKET이면 price 설정
+        if (requestDto.getBoardType() == BoardType.MARKET) {
+            board.setPrice(requestDto.getPrice());
+        }
 
         Board successBoard = boardRepository.save(board);
         publisher.publishEvent(new BoardImageEvent(null, successBoard.getImgUrl()));
@@ -51,6 +60,13 @@ public class BoardModifyService {
 
     @Transactional
     public void updateBoard(Long boardId, BoardRequestDto requestDto) {
+        UserEntity currentUser = infoService.getCurrentUser();
+        Board board = boardRepository.findById(boardId)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
+
+        if (!currentUser.equals(board.getUser())) {
+            throw new RestApiException(FORBIDDEN);
+        }
         try {
             UserEntity currentUser = infoService.getCurrentUser();
             //Optional로 꺼내 값이 있는지 확인
@@ -61,6 +77,16 @@ public class BoardModifyService {
                 throw new RestApiException(NOT_FOUND_BOARD_ID);
             }
 
+        board.setTitle(requestDto.getTitle());
+        board.setContent(requestDto.getContent());
+        board.setBoardType(requestDto.getBoardType());
+        board.setImgUrl(requestDto.getImgUrl());
+
+        if (requestDto.getBoardType() == BoardType.MARKET) {
+            board.setPrice(requestDto.getPrice());
+        } else {
+            board.setPrice(null); // 다른 게시판 유형일 경우 price 초기화
+        }
             //삭제 전 이미지 url 저장
             String OldImgUrl = board.getImgUrl();
             String recentImgUrl = requestDto.getImgUrl();
@@ -84,16 +110,27 @@ public class BoardModifyService {
         }
     }
 
+        boardRepository.save(board);
+    }
+
+
     @Transactional
     public void deleteBoard(Long id) {
         UserEntity currentUser = infoService.getCurrentUser();
-        Board board = boardRepository.findById(id).orElseThrow(
-                () -> new RestApiException(NOT_FOUND));
+        Board board = boardRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
 
-        // 게시글의 주인이 아니면 삭제 불가
+        // 작성자 확인
         if (!board.getUser().equals(currentUser)) {
             throw new RestApiException(FORBIDDEN);
         }
+        // 나중에 수정할 필요 있음
+        // 1. 관련 댓글 삭제
+        commentRepository.deleteByBoard(board);
+        // 2. 관련 좋아요 삭제
+        likeRepository.deleteByBoard(board);
+        // 3. 게시글 삭제
+        boardRepository.delete(board);
 
         String ImgUrl = board.getImgUrl();
         boardRepository.delete(board);
@@ -102,4 +139,6 @@ public class BoardModifyService {
             publisher.publishEvent(new BoardImageEvent(ImgUrl, null));
         }
     }
+
 }
+

@@ -5,8 +5,7 @@ FROM openjdk:17-alpine
 ARG JAR_FILE=/build/libs/*.jar
 
 #profile
-ENV USER_PROFILE dev
-ENV AWS_REGION ap-northeast-2
+ENV AWS_REGION=ap-northeast-2
 
 #AWS
 ENV AWS_REGION=ap-northeast-2
@@ -21,4 +20,4 @@ COPY ${JAR_FILE} app.jar
 EXPOSE 8080
 
 #애플리케이션 실행
-ENTRYPOINT ["java","-jar", "-Dspring.profiles.active=${USER_PROFILE}","/app/app.jar"]
+ENTRYPOINT ["java","-jar","/app/app.jar"]
