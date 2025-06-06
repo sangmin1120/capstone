@@ -5,9 +5,14 @@ import org.springframework.stereotype.Repository;
 import smu.capstone.domain.exerciseDiary.entity.ExerciseDiary;
 import smu.capstone.domain.member.entity.UserEntity;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface ExerciseDiaryRepository extends JpaRepository<ExerciseDiary, Long> {
     List<ExerciseDiary> findByUser(UserEntity user);
+    ExerciseDiary findByUserAndDate(UserEntity user, LocalDate date);
+
 }
+
+

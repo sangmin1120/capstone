@@ -1,17 +1,26 @@
 package smu.capstone.domain.exerciseDiary.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.domain.exerciseDiary.dto.ExerciseRecordRequestDto;
+import smu.capstone.domain.exerciseDiary.dto.ExerciseRecordResponseDto;
+import smu.capstone.domain.exerciseDiary.entity.Exercise;
 import smu.capstone.domain.exerciseDiary.entity.ExerciseDiary;
+import smu.capstone.domain.exerciseDiary.entity.ExerciseRecord;
 import smu.capstone.domain.exerciseDiary.repository.ExerciseDiaryRepository;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryRequestDto;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryResponseDto;
+import smu.capstone.domain.exerciseDiary.repository.ExerciseRecordRepository;
+import smu.capstone.domain.exerciseDiary.repository.ExerciseRepository;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.service.InfoService;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 import static smu.capstone.common.errorcode.CommonStatusCode.FORBIDDEN;
@@ -21,63 +30,80 @@ import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_EXERCISE_
 @RequiredArgsConstructor
 public class ExerciseDiaryService {
 
-    private final ExerciseDiaryRepository exerciseDiaryRepository;
+    private final ExerciseDiaryRepository diaryRepository;
+    private final ExerciseRepository exerciseRepository;
     private final InfoService infoService;
 
-    // 운동 기록 작성
-    public ExerciseDiaryResponseDto createExerciseDiary(ExerciseDiaryRequestDto requestDto) {
+    public ExerciseDiaryResponseDto createDiary(ExerciseDiaryRequestDto request) {
         UserEntity user = infoService.getCurrentUser();
 
         ExerciseDiary diary = ExerciseDiary.builder()
+                .title(request.getTitle())
+                .content(request.getContent())
+                .distance(request.getDistance())
+                .date(request.getDate())
                 .user(user)
-                .content(requestDto.getContent())
-                .distance(requestDto.getDistance())
                 .build();
 
-        return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
-    }
+        for (ExerciseRecordRequestDto r : request.getRecords()) {
+            Exercise exercise = exerciseRepository.findById(r.getExerciseId())
+                    .orElseThrow(() -> new RuntimeException("운동을 찾을 수 없습니다."));
 
-    // 본인의 운동 기록 목록 조회
-    public List<ExerciseDiaryResponseDto> getUserDiaries() {
-        UserEntity currentUser = infoService.getCurrentUser();
+            ExerciseRecord record = new ExerciseRecord();
+            record.setExercise(exercise);
+            record.setReps(r.getReps());
+            record.setSets(r.getSets());
 
-        List<ExerciseDiary> diaries = exerciseDiaryRepository.findByUser(currentUser);
-        return diaries.stream().map(ExerciseDiaryResponseDto::new).collect(Collectors.toList());
-    }
-
-    // 운동 기록 수정
-    @Transactional
-    public ExerciseDiaryResponseDto updateDiary(Long diaryId, ExerciseDiaryRequestDto requestDto) {
-        UserEntity currentUser = infoService.getCurrentUser();
-
-        ExerciseDiary diary = exerciseDiaryRepository.findById(diaryId)
-                .orElseThrow(() -> new RestApiException(NOT_FOUND_EXERCISE_DIARY));
-
-        // 본인만 수정 가능하도록 체크
-        if (!diary.getUser().equals(currentUser)) {
-            throw new RestApiException(FORBIDDEN);
+            diary.addRecord(record);
         }
 
-        diary.setContent(requestDto.getContent());
-        diary.setDistance(requestDto.getDistance());
+        ExerciseDiary saved = diaryRepository.save(diary);
 
-        return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
+        List<ExerciseRecordResponseDto> recordResponses = saved.getRecords().stream()
+                .map(record -> new ExerciseRecordResponseDto(
+                        record.getExercise().getId(),
+                        record.getExercise().getName(),
+                        record.getReps(),
+                        record.getSets()
+                ))
+                .collect(Collectors.toList());
+
+        return new ExerciseDiaryResponseDto(
+                saved.getId(),
+                saved.getTitle(),
+                saved.getContent(),
+                saved.getDate(),
+                saved.getDistance(),
+                recordResponses
+        );
     }
 
-    // 운동 기록 삭제
-    @Transactional
-    public void deleteDiary(Long diaryId) {
-        UserEntity currentUser = infoService.getCurrentUser();
+    public List<ExerciseDiaryResponseDto> getMyDiaries() {
+        UserEntity user = infoService.getCurrentUser();
+        List<ExerciseDiary> diaries = diaryRepository.findByUser(user);
 
-        ExerciseDiary diary = exerciseDiaryRepository.findById(diaryId)
-                .orElseThrow(() -> new RestApiException(NOT_FOUND_EXERCISE_DIARY));
+        return diaries.stream().map(diary -> {
+            List<ExerciseRecordResponseDto> recordResponses = diary.getRecords().stream()
+                    .map(record -> new ExerciseRecordResponseDto(
+                            record.getExercise().getId(),
+                            record.getExercise().getName(),
+                            record.getReps(),
+                            record.getSets()
+                    ))
+                    .collect(Collectors.toList());
 
-        //  본인만 삭제 가능하도록 체크
-        if (!diary.getUser().equals(currentUser)) {
-            throw new RestApiException(FORBIDDEN);
-        }
-
-        exerciseDiaryRepository.delete(diary);
+            return new ExerciseDiaryResponseDto(
+                    diary.getId(),
+                    diary.getTitle(),
+                    diary.getContent(),
+                    diary.getDate(),
+                    diary.getDistance(),
+                    recordResponses
+            );
+        }).collect(Collectors.toList());
     }
 }
+
+
+
 
