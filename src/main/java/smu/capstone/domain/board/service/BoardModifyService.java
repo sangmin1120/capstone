@@ -1,6 +1,5 @@
 package smu.capstone.domain.board.service;
 
-//import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +52,8 @@ public class BoardModifyService {
         }
 
         Board successBoard = boardRepository.save(board);
+
+        //트랜젝션 이벤트 발행
         publisher.publishEvent(new BoardImageEvent(null, successBoard.getImgUrl()));
 
         return successBoard;
@@ -60,38 +61,31 @@ public class BoardModifyService {
 
     @Transactional
     public void updateBoard(Long boardId, BoardRequestDto requestDto) {
-        UserEntity currentUser = infoService.getCurrentUser();
-        Board board = boardRepository.findById(boardId)
-                .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
-
-        if (!currentUser.equals(board.getUser())) {
-            throw new RestApiException(FORBIDDEN);
-        }
         try {
             UserEntity currentUser = infoService.getCurrentUser();
-            //Optional로 꺼내 값이 있는지 확인
-            Board board = boardRepository.findById(boardId).orElseThrow(
-                    () -> new RestApiException(NOT_FOUND));
+
+            Board board = boardRepository.findById(boardId)
+                    .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
 
             if (!currentUser.equals(board.getUser())) {
-                throw new RestApiException(NOT_FOUND_BOARD_ID);
+                throw new RestApiException(FORBIDDEN);
             }
 
-        board.setTitle(requestDto.getTitle());
-        board.setContent(requestDto.getContent());
-        board.setBoardType(requestDto.getBoardType());
-        board.setImgUrl(requestDto.getImgUrl());
+            board.setTitle(requestDto.getTitle());
+            board.setContent(requestDto.getContent());
+            board.setBoardType(requestDto.getBoardType());
+            board.setImgUrl(requestDto.getImgUrl());
 
-        if (requestDto.getBoardType() == BoardType.MARKET) {
-            board.setPrice(requestDto.getPrice());
-        } else {
-            board.setPrice(null); // 다른 게시판 유형일 경우 price 초기화
-        }
-            //삭제 전 이미지 url 저장
+            if (requestDto.getBoardType() == BoardType.MARKET) {
+                board.setPrice(requestDto.getPrice());
+            } else {
+                board.setPrice(null); // 다른 게시판 유형일 경우 price 초기화
+            }
+
+            //업데이트 전 이미지 url 저장
             String OldImgUrl = board.getImgUrl();
             String recentImgUrl = requestDto.getImgUrl();
 
-            //수정할 부분: 업데이트 부분
             Board updated = board.update(requestDto);
             boardRepository.save(updated);
 
@@ -106,13 +100,10 @@ public class BoardModifyService {
                 log.info("예외발생, afterUrl 삭제: {}", requestDto.getImgUrl());
                 s3Service.deleteObject(requestDto.getImgUrl());
             }
+            //다시 던짐
             throw e;
         }
     }
-
-        boardRepository.save(board);
-    }
-
 
     @Transactional
     public void deleteBoard(Long id) {
@@ -124,6 +115,7 @@ public class BoardModifyService {
         if (!board.getUser().equals(currentUser)) {
             throw new RestApiException(FORBIDDEN);
         }
+
         // 나중에 수정할 필요 있음
         // 1. 관련 댓글 삭제
         commentRepository.deleteByBoard(board);
@@ -133,11 +125,11 @@ public class BoardModifyService {
         boardRepository.delete(board);
 
         String ImgUrl = board.getImgUrl();
+
         boardRepository.delete(board);
 
-        if(ImgUrl != null){
-            publisher.publishEvent(new BoardImageEvent(ImgUrl, null));
-        }
+        //이벤트 발행
+        publisher.publishEvent(new BoardImageEvent(ImgUrl, null));
     }
 
 }
