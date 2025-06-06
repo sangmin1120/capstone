@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.errorcode.ChatExceptionCode;
 import smu.capstone.domain.chat.domain.ChatMessage;
 import smu.capstone.domain.chat.dto.ChatMessageDto;
@@ -15,6 +16,7 @@ import smu.capstone.domain.chat.exception.ChatException;
 import java.time.LocalDateTime;
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 @Component
 public class RedisPublisher {
 

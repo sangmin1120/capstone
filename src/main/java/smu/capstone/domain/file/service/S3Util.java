@@ -4,20 +4,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import smu.capstone.common.errorcode.CommonStatusCode;
+import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.file.dto.UrlResponseDto;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.net.URL;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
-
+/// 최대 5GB 올릴 수 있음. 추후 필요하다면 multipart 업로드/다운로드/삭제 구현
+/// TODO: 배포시 CloudFront 이용, 웹 도메인으로 url 치환 필요
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -28,6 +33,7 @@ public class S3Util {
     @Value("${cloud.aws.s3.baseurl}")
     private String baseUrl;
     private final S3Presigner s3Presigner;
+    private final S3Client s3Client;
 
     /***
      * 파일 업로드 url 반환
@@ -39,9 +45,9 @@ public class S3Util {
         //Key(Path) 생성
         String key = createFilePath(prefix, filename);
         //한글 파일 이름을 utf-8로 인코딩, url 생성 key에는 encoding한 key를 넣지 않음
-        String encodedKey = Arrays.stream(key.split("/"))
+        String encodedKey = Arrays.stream(key.split("/"))   // "/"를 기준으로 key를 배열화
                 .map(part -> URLEncoder.encode(part, StandardCharsets.UTF_8).replace("+", "%20"))
-                .collect(Collectors.joining("/"));
+                .collect(Collectors.joining("/"));        //string 조합 시 "/"를 다시 넣어 둠
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -104,6 +110,59 @@ public class S3Util {
         return s3Presigner.presignGetObject(downloadPresignedRequest).url().toString();
     }
 
+    public DeleteObjectResponse deleteObject(String filename){
+        //해당 값이 URL 값이라면 key 값 추출 후 decoding
+        if(filename.contains(baseUrl)){
+            filename = extractKey(filename);
+        }
+        String key = filename;
+
+        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                        .key(key)
+                        .bucket(bucket)
+                        .build();
+        return s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    //클라이언트측에서 chat/{roomId}/{filename} 방식으로 업로드 시
+    //"chat/{roomId}/" prefix를 가져와 해당 prefix의 key를 가진 객체 모두 삭제 처리
+    public void deleteObjects(String prefix){
+        //어디를 몇개의 키를 조회할 것인지 정함
+        ListObjectsV2Request listRequest = ListObjectsV2Request.builder()
+                .bucket(bucket)
+                .prefix(prefix)         //chat/{chatRoomId}
+                .maxKeys(1000)   //최대 1000개의 키를 한번에 조회
+                .build();
+        //페이징을 통해 나눠 조회
+        ListObjectsV2Iterable listResponse = s3Client.listObjectsV2Paginator(listRequest);
+
+        //각 페이징된 리스트를 조회
+        for(ListObjectsV2Response filelistres : listResponse){
+            //filelist를 조회해 key를 얻어 key리스트 만듦
+            //ObjectIdentifier로 변환, 삭제마커 생성하도록 함(정책 따라 실제 삭제는 일주일 뒤)
+            List<ObjectIdentifier> deleteObjectList = filelistres.contents().stream()
+                    .map(
+                            file -> ObjectIdentifier.builder()
+                                    .key(file.key())
+                                    .build()
+                    ).collect(Collectors.toList());
+
+            DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucket)
+                    .delete(Delete.builder().objects(deleteObjectList).build())
+                    .build();
+
+            DeleteObjectsResponse response = s3Client.deleteObjects(deleteObjectsRequest);
+
+            //삭제 실패 로그
+            if (response.hasErrors()) {
+                log.warn("파일 삭제 실패 리스트: {}", response.errors());
+            }else{
+                log.info("삭제 성공");
+            }
+        }
+    }
+
     /***
      * 파일 경로 생성 메서드, Path를 key로 사용함
      * @param prefix - bucket의 folder 이름(도메인 별 관리)
@@ -118,5 +177,11 @@ public class S3Util {
 
     private String extractFilename(String key){
         return key.substring(key.lastIndexOf('/') + 1);
+    }
+
+    private String extractKey(String filename){
+        filename = filename.substring(baseUrl.length()+1);
+        log.info("file subString: {}", filename);
+        return URLDecoder.decode(filename, StandardCharsets.UTF_8);
     }
 }

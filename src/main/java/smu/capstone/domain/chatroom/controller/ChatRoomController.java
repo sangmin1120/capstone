@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import smu.capstone.common.errorcode.ChatRoomExceptionCode;
 import smu.capstone.common.errorcode.CommonStatusCode;
 import smu.capstone.common.response.BaseResponse;
 import smu.capstone.common.response.ChatRoomResponse;

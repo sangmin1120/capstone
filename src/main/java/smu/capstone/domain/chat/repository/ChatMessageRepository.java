@@ -23,4 +23,7 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
     @org.springframework.data.mongodb.core.annotation.Collation(value = "ko")
     void deleteAllByChatRoomId(String chatRoomId);
 
+    @Query(value = "{ 'chatRoomId' : ?0, 'messageType' : {$in: ['FILE', 'IMAGE']} }", fields = "{'message': 1, '_id': 0 }")
+    @org.springframework.data.mongodb.core.annotation.Collation(value = "ko")
+    List<String> findAllFileMessagesByChatRoomId(String chatRoomId);
 }
