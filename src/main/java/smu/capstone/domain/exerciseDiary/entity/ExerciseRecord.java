@@ -1,6 +1,7 @@
 package smu.capstone.domain.exerciseDiary.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,7 +24,6 @@ public class ExerciseRecord {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exercise_id", nullable = false)
     private Exercise exercise;
-
 
     private int reps;
     private int sets;

@@ -1,5 +1,6 @@
 package smu.capstone.domain.exerciseDiary.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
@@ -16,7 +17,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExerciseDiaryResponseDto {
+    @JsonProperty("id")
     private Long id;
+
     private String title;
     private String content;
     private LocalDate date;

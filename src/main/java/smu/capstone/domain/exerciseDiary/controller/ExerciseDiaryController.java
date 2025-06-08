@@ -43,6 +43,30 @@ public class ExerciseDiaryController {
         List<ExerciseDiaryResponseDto> diaries = diaryService.getMyDiaries();
         return ResponseEntity.ok(diaries);
     }
+
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<Void> deleteDiary(@PathVariable("diaryId") Long diaryId) {
+        diaryService.deleteDiary(diaryId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{diaryId}")
+    public ResponseEntity<Void> updateDiary(
+            @PathVariable Long diaryId,
+            @RequestBody ExerciseDiaryRequestDto requestDto) {
+        diaryService.updateDiary(diaryId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/date")
+    public ResponseEntity<ExerciseDiaryResponseDto> getDiariesByDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        ExerciseDiaryResponseDto diaries = diaryService.getDiaryByDate(date);
+        return ResponseEntity.ok(diaries);
+    }
+
+
+
 }
 
 

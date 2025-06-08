@@ -1,5 +1,6 @@
 package smu.capstone.domain.exerciseDiary.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import smu.capstone.common.domain.BaseEntity;
@@ -21,6 +22,7 @@ public class ExerciseDiary {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @JsonProperty("id")
     private Long id; // PK
 
     private String title;

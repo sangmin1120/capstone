@@ -2,6 +2,7 @@ package smu.capstone.domain.exerciseDiary.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseRequestDto;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseResponseDto;
 import smu.capstone.domain.exerciseDiary.entity.Exercise;
@@ -50,6 +51,25 @@ public class ExerciseService {
                         e.getId(), e.getName(), e.getDescription(), e.getDefaultReps(), e.getDefaultSets()))
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public void updateExercise(Long exerciseId, ExerciseRequestDto dto) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new IllegalArgumentException("운동 ID를 찾을 수 없습니다."));
+
+        exercise.setName(dto.getName());
+        exercise.setDescription(dto.getDescription());
+    }
+
+    @Transactional
+    public void deleteExercise(Long exerciseId) {
+        Exercise exercise = exerciseRepository.findById(exerciseId)
+                .orElseThrow(() -> new IllegalArgumentException("운동 ID를 찾을 수 없습니다."));
+
+        exerciseRepository.delete(exercise);
+    }
+
+
 }
 
 

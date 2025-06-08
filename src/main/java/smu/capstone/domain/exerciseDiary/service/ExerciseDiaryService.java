@@ -19,8 +19,10 @@ import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.service.InfoService;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static smu.capstone.common.errorcode.CommonStatusCode.FORBIDDEN;
@@ -101,6 +103,69 @@ public class ExerciseDiaryService {
                     recordResponses
             );
         }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteDiary(Long diaryId) {
+        ExerciseDiary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 다이어리 ID"));
+
+        diaryRepository.delete(diary);
+    }
+
+    @Transactional
+    public void updateDiary(Long diaryId, ExerciseDiaryRequestDto dto) {
+        ExerciseDiary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 다이어리 ID"));
+
+        // 기존 기록 삭제 (Cascade + orphanRemoval 적용됨)
+        diary.getRecords().clear();
+
+        // 새로운 기록 생성
+        List<ExerciseRecord> newRecords = dto.getRecords().stream()
+                .map(recordDto -> {
+                    Exercise exercise = exerciseRepository.findById(recordDto.getExerciseId())
+                            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 운동 ID"));
+
+                    ExerciseRecord record = new ExerciseRecord();
+                    record.setDiary(diary);
+                    record.setExercise(exercise);
+                    record.setReps(recordDto.getReps());
+                    record.setSets(recordDto.getSets());
+                    return record;
+                }).toList();
+
+
+        diary.setTitle(dto.getTitle());
+        diary.setContent(dto.getContent());
+        diary.setDate(dto.getDate());
+        diary.setDistance(dto.getDistance());
+        diary.getRecords().addAll(newRecords);
+    }
+
+    @Transactional(readOnly = true)
+    public ExerciseDiaryResponseDto getDiaryByDate(LocalDate date) {
+        UserEntity user = infoService.getCurrentUser(); // 현재 로그인 유저 기준
+
+        ExerciseDiary diary = diaryRepository.findByUserAndDate(user, date);
+
+        List<ExerciseRecordResponseDto> recordDtos = diary.getRecords().stream()
+                .map(record -> new ExerciseRecordResponseDto(
+                        record.getExercise().getId(),
+                        record.getExercise().getName(),
+                        record.getReps(),
+                        record.getSets()
+                ))
+                .toList();
+
+        return new ExerciseDiaryResponseDto(
+                diary.getId(),
+                diary.getTitle(),
+                diary.getContent(),
+                diary.getDate(),
+                diary.getDistance(),
+                recordDtos
+        );
     }
 }
 
