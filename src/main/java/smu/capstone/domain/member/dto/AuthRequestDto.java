@@ -50,6 +50,7 @@ public class AuthRequestDto {
                     .username(username)
                     .phoneNumber(phoneNumber)
                     .birth(birth)
+                    .isDeleted(false)
                     .userType(userType)
                     .authority(Authority.ROLE_USER)
                     .build();

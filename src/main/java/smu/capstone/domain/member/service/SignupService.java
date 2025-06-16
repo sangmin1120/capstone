@@ -34,10 +34,7 @@ public class SignupService {
 
     @Transactional
     public void signup(AuthRequestDto.SignUp authRequestDto) {
-        if (userRepository.existsByAccountId(authRequestDto.getAccountId())) {
-            throw new RestApiException(DUPLICATED_ID);
-        }
-
+        // 이메일 인증 처리
         MailVerificationCache mailVerificationCache = mailVerificationCacheRepository.findById(authRequestDto.getEmail())
                 .orElseThrow(() -> new RestApiException(AUTHORIZATION_REQUIRED));
 
@@ -46,13 +43,23 @@ public class SignupService {
             throw new RestApiException(NOT_VERIFIED_MAIL);
         }
 
-        UserEntity user = authRequestDto.toDto(passwordEncoder);
+        UserEntity user;
+        // 탈퇴한 정보가 남아있으면
+        if (userRepository.existsByAccountIdAndIsDeleted(authRequestDto.getAccountId(), true)) {
+            user = userRepository.findByAccountId(authRequestDto.getAccountId())
+                    .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
+            user.restore();
+        } else if (userRepository.existsByAccountIdAndIsDeleted(authRequestDto.getAccountId(), false)) { // 이메일 중복
+            throw new RestApiException(DUPLICATED_ID);
+        } else {
+            user = authRequestDto.toDto(passwordEncoder);
+        }
         userRepository.save(user);
     }
 
     public void sendVerificationMail(AuthRequestDto.VerificationMail authRequestDto) {
 
-        userRepository.findByEmail(authRequestDto.getEmail()).ifPresent((user) -> {
+        userRepository.findByEmailAndIsDeleted(authRequestDto.getEmail(), false).ifPresent((user) -> {
             throw new RestApiException(DUPLICATED_MAIL);
         });
         String key = CertificationKeyGenerator.generateStrongKey();
