@@ -24,7 +24,6 @@ public class AuthController {
     private final SignupService signupService;
     private final LoginService loginService;
     private final TokenService tokenService;
-    private final InfoService infoService;
 
     @PostMapping("/signup")
     public BaseResponse<Void> signup(@RequestBody AuthRequestDto.SignUp authRequestDto) {

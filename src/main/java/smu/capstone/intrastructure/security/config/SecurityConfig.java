@@ -15,6 +15,7 @@ import smu.capstone.intrastructure.jwt.filter.JwtFilter;
 import smu.capstone.intrastructure.jwt.handler.JwtAccessDeniedHandler;
 import smu.capstone.intrastructure.jwt.handler.JwtAuthenticationEntryPoint;
 import smu.capstone.intrastructure.jwt.service.TokenProvider;
+import smu.capstone.intrastructure.jwt.service.TokenService;
 
 @Configuration
 @EnableWebSecurity
@@ -23,12 +24,13 @@ import smu.capstone.intrastructure.jwt.service.TokenProvider;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public JwtFilter jwtFilter(TokenProvider tokenProvider) {
-        return new JwtFilter(tokenProvider);
+        return new JwtFilter(tokenProvider, tokenService);
     }
 
     @Bean
