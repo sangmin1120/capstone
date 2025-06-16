@@ -3,6 +3,7 @@ package smu.capstone.domain.member.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static smu.capstone.common.errorcode.AuthExceptionCode.WITHDRAW_ID;
 import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASSWORD;
 import static smu.capstone.intrastructure.jwt.TokenType.ACCESS_TOKEN;
 import static smu.capstone.intrastructure.jwt.TokenType.REFRESH_TOKEN;
@@ -37,6 +39,9 @@ public class LoginService {
     private final PasswordEncoder passwordEncoder;
     private final Environment env;
 
+    @Value("${spring.domain}")
+    String domain;
+
     @Transactional
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
 
@@ -44,6 +49,11 @@ public class LoginService {
         String accountId = authRequestDto.getAccountId();
         UserEntity user = userRepository.findByAccountId(accountId).orElseThrow(() ->
                 new RestApiException(INVALID_ID_OR_PASSWORD));
+
+        // 탈퇴 회원 추가
+        if (user.isDeleted()) {
+            throw new RestApiException(WITHDRAW_ID);
+        }
 
         if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
             throw new RestApiException(INVALID_ID_OR_PASSWORD);
@@ -99,7 +109,7 @@ public class LoginService {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setDomain("smu-rehab.duckdns.org");
+        cookie.setDomain(domain);
 
         int maxAge = cookie.getMaxAge();
         String encodedValue = cookie.getValue(); // 이미 URLEncoded 상태여야 함

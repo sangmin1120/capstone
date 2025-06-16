@@ -1,5 +1,6 @@
 package smu.capstone.domain.member.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,6 +11,8 @@ import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.respository.UserRepository;
 import smu.capstone.domain.member.util.LoginUserUtil;
+import smu.capstone.intrastructure.jwt.service.TokenProvider;
+import smu.capstone.intrastructure.jwt.service.TokenService;
 
 import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_USER;
 
@@ -20,6 +23,8 @@ public class InfoService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
+    private final TokenProvider tokenProvider;
 
     // 비밀번호 변경
     @Transactional
@@ -35,5 +40,16 @@ public class InfoService {
     public UserEntity getCurrentUser() {
         Long userId = LoginUserUtil.getLoginMemberId();
         return userRepository.findById(userId).orElseThrow(()-> new RestApiException(NOT_FOUND_USER));
+    }
+
+    // 회원 탈퇴
+    public void delete(HttpServletRequest request) {
+        UserEntity user = getCurrentUser();
+
+        // entity isDelete 값을 true 로 변경 -> 실제 DB 삭제는 안함
+        user.withdraw();
+        userRepository.save(user);
+        // 토큰값 블랙리스트
+        tokenService.blacklistAccessToken(tokenProvider.getAccessToken(request));
     }
 }
