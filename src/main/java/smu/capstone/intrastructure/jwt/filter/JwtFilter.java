@@ -54,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         catch (RestApiException e) {
-            log.info("[JwtFilter] Token validation failed: {}", e.getMessage());
+            log.error("[JwtFilter] Token validation failed", e);
         }
         filterChain.doFilter(request, response);
     }
