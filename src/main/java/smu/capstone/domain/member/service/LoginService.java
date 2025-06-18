@@ -47,13 +47,15 @@ public class LoginService {
 
 
         String accountId = authRequestDto.getAccountId();
-        UserEntity user = userRepository.findByAccountId(accountId).orElseThrow(() ->
+        // 탈퇴한 회원 제외하고 accoutnId 검색
+        UserEntity user = userRepository.findByAccountIdAndIsDeleted(accountId, false).orElseThrow(() ->
                 new RestApiException(INVALID_ID_OR_PASSWORD));
 
-        // 탈퇴 회원 추가
+        /*
         if (user.isDeleted()) {
             throw new RestApiException(WITHDRAW_ID);
         }
+         */
 
         if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
             throw new RestApiException(INVALID_ID_OR_PASSWORD);
