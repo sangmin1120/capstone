@@ -73,7 +73,7 @@ public class UserSearchService {
     //비밀번호 찾기1 - 인증 메일 전송
     public void sendVerificationMail(AuthRequestDto.@Valid VerificationMail authRequestDto) {
 
-        userRepository.findByEmail(authRequestDto.getEmail())
+        userRepository.findByEmailAndIsDeleted(authRequestDto.getEmail(), false) // 탈퇴 회원은 제외해야됨
                 .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
 
         String key = CertificationKeyGenerator.generateStrongKey();

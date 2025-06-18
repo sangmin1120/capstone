@@ -109,7 +109,7 @@ public class LoginService {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
-        cookie.setDomain(domain);
+        cookie.setDomain("smu-rehab.duckdns.org");
 
         int maxAge = cookie.getMaxAge();
         String encodedValue = cookie.getValue(); // 이미 URLEncoded 상태여야 함
