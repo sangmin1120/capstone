@@ -68,8 +68,6 @@ public class ExerciseService {
 
         exerciseRepository.delete(exercise);
     }
-
-
 }
 
 

@@ -167,6 +167,19 @@ public class ExerciseDiaryService {
                 recordDtos
         );
     }
+
+    public void saveDistanceToDiary(Long userId, double distance, String date) {
+        ExerciseDiary diary = diaryRepository.findByUserAndDate(infoService.getCurrentUser(), LocalDate.parse(date));
+        diary.setDistance(distance);
+        diaryRepository.save(diary);
+    }
+
+    public void updateDistance(Long diaryId, double distance) {
+        ExerciseDiary diary = diaryRepository.findById(diaryId)
+                .orElseThrow(() -> new RuntimeException("일기를 찾을 수 없습니다."));
+        diary.setDistance(distance);
+        diaryRepository.save(diary);
+    }
 }
 
 

@@ -12,7 +12,6 @@ import java.util.List;
 public interface ExerciseDiaryRepository extends JpaRepository<ExerciseDiary, Long> {
     List<ExerciseDiary> findByUser(UserEntity user);
     ExerciseDiary findByUserAndDate(UserEntity user, LocalDate date);
-
 }
 
 
