@@ -20,7 +20,6 @@ public class CommentController {
 
     private final CommentService commentService;
 
-
     //  댓글 작성
     @PostMapping
     public BaseResponse<CommentResponseDto> addComment(@PathVariable("boardId") Long boardId,

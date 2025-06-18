@@ -11,6 +11,7 @@ public enum AuthExceptionCode implements StatusCode {
     REFRESH_TOKEN_NOT_EXIST(HttpStatus.UNAUTHORIZED, "A401-4", "리프레쉬 토큰이 유효하지 않습니다."),
     NOT_VERIFIED_MAIL(HttpStatus.UNAUTHORIZED, "A401-5", "인증을 진행해주세요"),
     INVALID_VERIFICATION_KEY(HttpStatus.UNAUTHORIZED, "A401-6", "잘못된 인증번호입니다."),
+    WITHDRAW_ID(HttpStatus.UNAUTHORIZED, "A401-7", "이미 탈퇴한 회원입니다."),
 
     EXPIRED_TOKEN(HttpStatus.FORBIDDEN, "A403-1", "토큰의 유효 시간이 만료 되었습니다."),
 

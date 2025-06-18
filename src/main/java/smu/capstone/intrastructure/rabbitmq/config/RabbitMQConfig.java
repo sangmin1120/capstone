@@ -117,11 +117,5 @@ public class RabbitMQConfig {
         admin.setAutoStartup(false); // ❗ 자동 등록 비활성화
         return admin;
     }
-
-    // 준성
-    @Bean
-    public Queue emailAuthQueue() {
-        return new Queue("email.auth.queue", true); // durable = true
-    }
 }
 
