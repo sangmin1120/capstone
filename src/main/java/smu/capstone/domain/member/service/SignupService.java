@@ -45,14 +45,16 @@ public class SignupService {
 
         UserEntity user;
         // 탈퇴한 정보가 남아있으면
-        if (userRepository.existsByAccountIdAndIsDeleted(authRequestDto.getAccountId(), true)) {
-            user = userRepository.findByAccountId(authRequestDto.getAccountId())
+        if (userRepository.existsByEmailAndIsDeleted(authRequestDto.getEmail(), true)) {
+            // 탈퇴한 회원의 정보를 가져와서 복구
+            user = userRepository.findByEmailAndIsDeleted(authRequestDto.getEmail(), true)
                     .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
+            user.changeDate(authRequestDto, passwordEncoder);
             user.restore();
         } else if (userRepository.existsByAccountIdAndIsDeleted(authRequestDto.getAccountId(), false)) { // 이메일 중복
             throw new RestApiException(DUPLICATED_ID);
         } else {
-            user = authRequestDto.toDto(passwordEncoder);
+            user = authRequestDto.toEntity(passwordEncoder);
         }
         userRepository.save(user);
     }
