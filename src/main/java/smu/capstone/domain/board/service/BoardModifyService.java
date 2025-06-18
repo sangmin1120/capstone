@@ -61,11 +61,16 @@ public class BoardModifyService {
 
     @Transactional
     public void updateBoard(Long boardId, BoardRequestDto requestDto) {
+        String OldImgUrl = null;
         try {
             UserEntity currentUser = infoService.getCurrentUser();
 
             Board board = boardRepository.findById(boardId)
                     .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
+
+            //업데이트 전 각 이미지 url 저장
+            OldImgUrl = board.getImgUrl();
+            String recentImgUrl = requestDto.getImgUrl();
 
             if (!currentUser.equals(board.getUser())) {
                 throw new RestApiException(FORBIDDEN);
@@ -82,12 +87,7 @@ public class BoardModifyService {
                 board.setPrice(null); // 다른 게시판 유형일 경우 price 초기화
             }
 
-            //업데이트 전 이미지 url 저장
-            String OldImgUrl = board.getImgUrl();
-            String recentImgUrl = requestDto.getImgUrl();
-
-            Board updated = board.update(requestDto);
-            boardRepository.save(updated);
+            boardRepository.save(board);
 
             //만약 기존 이미지 Url이 있고, 갱신되는 이미지 URL가 기존 URL과 같지 않을 경우,
             //null이나 다른 URL로 변경된다면 트랜젝션 커밋 후 삭제 처리
@@ -96,7 +96,7 @@ public class BoardModifyService {
             }
         }catch (RestApiException e) {
             //Exception으로 이벤트 발행 안될 경우 삭제 처리
-            if(requestDto.getImgUrl()!=null) {
+            if(requestDto.getImgUrl()!=null && !Objects.equals(requestDto.getImgUrl(), OldImgUrl)) {
                 log.info("예외발생, afterUrl 삭제: {}", requestDto.getImgUrl());
                 s3Service.deleteObject(requestDto.getImgUrl());
             }
@@ -125,8 +125,6 @@ public class BoardModifyService {
         boardRepository.delete(board);
 
         String ImgUrl = board.getImgUrl();
-
-        boardRepository.delete(board);
 
         //이벤트 발행
         publisher.publishEvent(new BoardImageEvent(ImgUrl, null));
