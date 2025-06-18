@@ -4,7 +4,9 @@ package smu.capstone.domain.member.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import smu.capstone.common.domain.BaseEntity;
+import smu.capstone.domain.member.dto.AuthRequestDto;
 
 
 /**
@@ -50,5 +52,15 @@ public class UserEntity extends BaseEntity {
     }
     public void restore() {
         this.isDeleted = false;
+    }
+
+    public void changeDate(AuthRequestDto.SignUp dto, PasswordEncoder passwordEncoder) {
+        this.accountId = dto.getAccountId();
+        this.password = passwordEncoder.encode(dto.getPassword());
+        this.username = dto.getUsername();
+        this.phoneNumber = dto.getPhoneNumber();
+        this.birth = dto.getBirth();
+        this.userType = dto.getUserType();
+        this.authority = Authority.ROLE_USER;
     }
 }

@@ -42,7 +42,7 @@ public class AuthRequestDto {
         String birth; // 생년월일 year.month.day
         UserType userType;
 
-        public UserEntity toDto(PasswordEncoder passwordEncoder) {
+        public UserEntity toEntity(PasswordEncoder passwordEncoder) {
             return UserEntity.builder()
                     .accountId(accountId)
                     .email(email)
