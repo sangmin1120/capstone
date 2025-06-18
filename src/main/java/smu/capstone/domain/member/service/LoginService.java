@@ -3,6 +3,7 @@ package smu.capstone.domain.member.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,6 +23,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+import static smu.capstone.common.errorcode.AuthExceptionCode.WITHDRAW_ID;
 import static smu.capstone.common.errorcode.AuthExceptionCode.INVALID_ID_OR_PASSWORD;
 import static smu.capstone.intrastructure.jwt.TokenType.ACCESS_TOKEN;
 import static smu.capstone.intrastructure.jwt.TokenType.REFRESH_TOKEN;
@@ -37,13 +39,23 @@ public class LoginService {
     private final PasswordEncoder passwordEncoder;
     private final Environment env;
 
+    @Value("${spring.domain}")
+    String domain;
+
     @Transactional
     public TokenResponseDto login(HttpServletResponse response, AuthRequestDto.Login authRequestDto) {
 
 
         String accountId = authRequestDto.getAccountId();
-        UserEntity user = userRepository.findByAccountId(accountId).orElseThrow(() ->
+        // 탈퇴한 회원 제외하고 accoutnId 검색
+        UserEntity user = userRepository.findByAccountIdAndIsDeleted(accountId, false).orElseThrow(() ->
                 new RestApiException(INVALID_ID_OR_PASSWORD));
+
+        /*
+        if (user.isDeleted()) {
+            throw new RestApiException(WITHDRAW_ID);
+        }
+         */
 
         if (!passwordEncoder.matches(authRequestDto.getPassword(), user.getPassword())) {
             throw new RestApiException(INVALID_ID_OR_PASSWORD);
