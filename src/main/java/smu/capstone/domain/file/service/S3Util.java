@@ -4,9 +4,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import smu.capstone.common.errorcode.CommonStatusCode;
-import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.file.dto.UrlResponseDto;
+import smu.capstone.domain.file.entity.S3FailedFile;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
@@ -14,7 +13,6 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
-import java.net.URL;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -22,7 +20,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.stream.Collectors;
 /// 최대 5GB 올릴 수 있음. 추후 필요하다면 multipart 업로드/다운로드/삭제 구현
-/// TODO: 배포시 CloudFront 이용, 웹 도메인으로 url 치환 필요
+/// TODO: 웹 도메인으로 url 치환 필요
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -34,7 +32,7 @@ public class S3Util {
     private String baseUrl;
     private final S3Presigner s3Presigner;
     private final S3Client s3Client;
-
+    private final S3FailedUtil s3FailedUtil;
     /***
      * 파일 업로드 url 반환
      * @param prefix folder name
@@ -121,7 +119,12 @@ public class S3Util {
                         .key(key)
                         .bucket(bucket)
                         .build();
-        return s3Client.deleteObject(deleteObjectRequest);
+        DeleteObjectResponse response = s3Client.deleteObject(deleteObjectRequest);
+        if(!response.sdkHttpResponse().isSuccessful()){
+            log.warn("삭제 실패 {}", filename);
+            s3FailedUtil.saveFailedFile(key);
+        }
+        return response;
     }
 
     //클라이언트측에서 chat/{roomId}/{filename} 방식으로 업로드 시
@@ -157,10 +160,42 @@ public class S3Util {
             //삭제 실패 로그
             if (response.hasErrors()) {
                 log.warn("파일 삭제 실패 리스트: {}", response.errors());
+                s3FailedUtil.saveFailedFiles(response.errors());
             }else{
                 log.info("삭제 성공");
             }
         }
+    }
+
+    public List<DeletedObject> deleteKeys(List<S3FailedFile> keys){
+        S3Client s3 = S3Client.create();
+        List<DeletedObject> deletedObjects = new ArrayList<>();
+        for(int i =0; i<keys.size(); i+=1000) {
+            int end = Math.min(i+1000, keys.size());
+
+            //ObjectIdentifier로 조회
+            List<ObjectIdentifier> objectsToDelete = keys.subList(i, end).stream()
+                    .map(key -> ObjectIdentifier.builder().key(key.getKeyname()).build())
+                    .collect(Collectors.toList());
+
+            //삭제 객체 생성
+            Delete delete = Delete.builder().objects(objectsToDelete).build();
+
+            //삭제
+            DeleteObjectsRequest request = DeleteObjectsRequest.builder()
+                    .bucket(bucket)
+                    .delete(delete)
+                    .build();
+            DeleteObjectsResponse response = s3.deleteObjects(request);
+            deletedObjects.addAll(response.deleted());
+            if (response.hasErrors()) {
+                log.warn("파일 삭제 재시도 실패 리스트: {}", response.errors());
+            }else{
+                log.info("삭제 성공");
+            }
+        }
+        //삭제 성공한 리스트 반환
+        return deletedObjects;
     }
 
     /***

@@ -117,10 +117,7 @@ public class S3Service {
             return;
         }
         try {
-             DeleteObjectResponse response = s3Util.deleteObject(filename);
-             if(!response.sdkHttpResponse().isSuccessful()){
-                 log.warn("삭제 실패 {}", filename);
-             }
+            s3Util.deleteObject(filename);
         }catch (IllegalArgumentException e){
             log.warn("파일 삭제 실패: 잘못된 URL이나 Key입니다. {}", e.getMessage());
         }catch (S3Exception e){
@@ -145,6 +142,7 @@ public class S3Service {
            s3Util.deleteObjects("chat/"+roomId+"/");
        }catch (S3Exception e){
            log.warn("파일 삭제 실패: S3 요청 실패 {}", e.getMessage());
+
        }catch (SdkClientException e){
            log.warn("파일 삭제 실패: 잘못된 클라이언트 환경 {}", e.getMessage());
        }catch (Exception e){
