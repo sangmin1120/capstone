@@ -108,7 +108,7 @@ public class S3Util {
         return s3Presigner.presignGetObject(downloadPresignedRequest).url().toString();
     }
 
-    public DeleteObjectResponse deleteObject(String filename){
+    public void deleteObject(String filename){
         //해당 값이 URL 값이라면 key 값 추출 후 decoding
         if(filename.contains(baseUrl)){
             filename = extractKey(filename);
@@ -124,7 +124,6 @@ public class S3Util {
             log.warn("삭제 실패 {}", filename);
             s3FailedUtil.saveFailedFile(key);
         }
-        return response;
     }
 
     //클라이언트측에서 chat/{roomId}/{filename} 방식으로 업로드 시
@@ -168,7 +167,6 @@ public class S3Util {
     }
 
     public List<DeletedObject> deleteKeys(List<S3FailedFile> keys){
-        S3Client s3 = S3Client.create();
         List<DeletedObject> deletedObjects = new ArrayList<>();
         for(int i =0; i<keys.size(); i+=1000) {
             int end = Math.min(i+1000, keys.size());
@@ -186,7 +184,7 @@ public class S3Util {
                     .bucket(bucket)
                     .delete(delete)
                     .build();
-            DeleteObjectsResponse response = s3.deleteObjects(request);
+            DeleteObjectsResponse response = s3Client.deleteObjects(request);
             deletedObjects.addAll(response.deleted());
             if (response.hasErrors()) {
                 log.warn("파일 삭제 재시도 실패 리스트: {}", response.errors());

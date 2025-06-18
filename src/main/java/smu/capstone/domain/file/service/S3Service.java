@@ -135,7 +135,7 @@ public class S3Service {
      */
     public void deleteChatObjects(String roomId){
        try {
-           if(roomId==null && roomId.isBlank()){
+           if(roomId==null || roomId.isBlank()){
                log.info("잘못된 roomId: {}", roomId);
                throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
            }
