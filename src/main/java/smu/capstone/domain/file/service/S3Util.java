@@ -58,7 +58,7 @@ public class S3Util {
         String url = s3Presigner.presignPutObject(putPresignedRequest).url().toString();
 
         //URL과 key 반환
-        UrlResponseDto urlResponseDto = new UrlResponseDto().builder()
+        UrlResponseDto urlResponseDto = UrlResponseDto.builder()
                 .presignedUrl(url)
                 .accessUrl(String.format("%s/%s",baseUrl, encodedKey))
                 .key(key)

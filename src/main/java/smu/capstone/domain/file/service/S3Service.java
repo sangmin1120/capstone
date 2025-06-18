@@ -8,7 +8,6 @@ import smu.capstone.common.errorcode.CommonStatusCode;
 import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.file.dto.UrlResponseDto;
 import software.amazon.awssdk.core.exception.SdkClientException;
-import software.amazon.awssdk.services.s3.model.DeleteObjectResponse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -152,7 +151,7 @@ public class S3Service {
 
     private boolean validationImgFile(String filename){
         String extension = getFileExtension(filename);
-        if(extension.equals("")){
+        if(extension.isEmpty()){
             return false;
         }
         return checkImgFile(extension);
