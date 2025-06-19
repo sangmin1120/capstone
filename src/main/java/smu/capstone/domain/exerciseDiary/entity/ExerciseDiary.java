@@ -3,7 +3,6 @@ package smu.capstone.domain.exerciseDiary.entity;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
-import smu.capstone.common.domain.BaseEntity;
 import smu.capstone.domain.member.entity.UserEntity;
 
 import java.time.LocalDate;
@@ -27,7 +26,7 @@ public class ExerciseDiary {
 
     private String title;
     private String content; // 운동 기록 내용
-    private Double distance; // 이동 거리 (단위: km) - 지도 API 사용 예정
+    //private Double distance; // 이동 거리 (단위: km) - 지도 API 사용 예정
 
     @Column(nullable = false)
     private LocalDate date; // 실제 운동 기록일
