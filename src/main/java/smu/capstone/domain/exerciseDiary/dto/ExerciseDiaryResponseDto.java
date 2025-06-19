@@ -7,13 +7,15 @@ import java.time.LocalDateTime;
 
 @Getter
 public class ExerciseDiaryResponseDto {
+    private Long id; // 구분하는 id
     private String content; // 운동 기록 내용
-    private Double distance; // 이동 거리 (km)
+    private String description; // 이동 거리 (km)
     private LocalDateTime createdAt; // 작성 날짜
 
     public ExerciseDiaryResponseDto(ExerciseDiary exerciseDiary) {
+        this.id = exerciseDiary.getId();
         this.content = exerciseDiary.getContent();
-        this.distance = exerciseDiary.getDistance();
+        this.description = exerciseDiary.getDescription();
         this.createdAt = exerciseDiary.getCreatedAt();
 
     }
