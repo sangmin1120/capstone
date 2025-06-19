@@ -62,9 +62,9 @@ public class BoardModifyService {
     @Transactional
     public void updateBoard(Long boardId, BoardRequestDto requestDto) {
         String OldImgUrl = null;
-        try {
-            UserEntity currentUser = infoService.getCurrentUser();
 
+        UserEntity currentUser = infoService.getCurrentUser();
+        try {
             Board board = boardRepository.findById(boardId)
                     .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID));
 
@@ -95,7 +95,7 @@ public class BoardModifyService {
                 publisher.publishEvent(new BoardImageEvent(OldImgUrl, recentImgUrl));
             }
         }catch (RestApiException e) {
-            //Exception으로 이벤트 발행 안될 경우 삭제 처리
+            //Board를 찾지 못해 Exception 발생하여 이벤트 발행 안될 경우 삭제 처리
             if(requestDto.getImgUrl()!=null && !Objects.equals(requestDto.getImgUrl(), OldImgUrl)) {
                 log.info("예외발생, afterUrl 삭제: {}", requestDto.getImgUrl());
                 s3Service.deleteObject(requestDto.getImgUrl());
