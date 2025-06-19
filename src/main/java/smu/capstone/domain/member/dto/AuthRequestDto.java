@@ -42,7 +42,7 @@ public class AuthRequestDto {
         String birth; // 생년월일 year.month.day
         UserType userType;
 
-        public UserEntity toDto(PasswordEncoder passwordEncoder) {
+        public UserEntity toEntity(PasswordEncoder passwordEncoder) {
             return UserEntity.builder()
                     .accountId(accountId)
                     .email(email)
@@ -50,6 +50,7 @@ public class AuthRequestDto {
                     .username(username)
                     .phoneNumber(phoneNumber)
                     .birth(birth)
+                    .isDeleted(false)
                     .userType(userType)
                     .authority(Authority.ROLE_USER)
                     .build();

@@ -13,4 +13,5 @@ public class BoardRequestDto {
     private String content;
     private BoardType boardType;
     private String imgUrl;
+    private Long price;
 }

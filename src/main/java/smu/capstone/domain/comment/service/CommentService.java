@@ -115,4 +115,17 @@ public class CommentService {
 
         return new ArrayList<>(fcmTokens);
     }
+
+    // 댓글 수정
+    @Transactional
+    public void updateComment(Long commentId, Long userId, CommentRequestDto requestDto) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND));
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new RestApiException(FORBIDDEN);
+        }
+
+        comment.update(requestDto.getContent());
+    }
 }

@@ -20,6 +20,7 @@ public class BoardResponseDto {
     private String email;
     private String imgUrl;
     private int likeCount;
+    private Long price;
 
     public BoardResponseDto(Board board) {
         this.boardId = board.getId();
@@ -33,6 +34,7 @@ public class BoardResponseDto {
         this.email = user.getEmail();
         this.imgUrl= board.getImgUrl();
         this.likeCount=board.getLikeCount();
+        this.price=board.getPrice();
     }
 }
 

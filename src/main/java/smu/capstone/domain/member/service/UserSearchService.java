@@ -33,7 +33,7 @@ public class UserSearchService {
     //accountId 찾기
     public String searchId(UserSearchDto.SearchIdRequest searchIdRequest) {
 
-        UserEntity userEntity = userRepository.findByEmail(searchIdRequest.getEmail())
+        UserEntity userEntity = userRepository.findByEmailAndIsDeleted(searchIdRequest.getEmail(), false)
                 .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
 
         return userEntity.getAccountId();
@@ -59,7 +59,7 @@ public class UserSearchService {
     //비밀번호 찾기3 - 변경된 비밀번호 전송 후, DB 변경
     public void verifyMailAndSendNewPassword(AuthRequestDto.@Valid VerificationMail authRequestDto) {
         checkedVerifyMail(authRequestDto);
-        UserEntity userEntity = userRepository.findByEmail(authRequestDto.getEmail())
+        UserEntity userEntity = userRepository.findByEmailAndIsDeleted(authRequestDto.getEmail(), false)
                 .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
 
         //새로운 비밀번호 전송
@@ -73,7 +73,7 @@ public class UserSearchService {
     //비밀번호 찾기1 - 인증 메일 전송
     public void sendVerificationMail(AuthRequestDto.@Valid VerificationMail authRequestDto) {
 
-        userRepository.findByEmail(authRequestDto.getEmail())
+        userRepository.findByEmailAndIsDeleted(authRequestDto.getEmail(), false) // 탈퇴 회원은 제외해야됨
                 .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
 
         String key = CertificationKeyGenerator.generateStrongKey();

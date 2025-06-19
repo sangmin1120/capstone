@@ -3,6 +3,7 @@ package smu.capstone.intrastructure.security.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -15,6 +16,7 @@ import smu.capstone.intrastructure.jwt.filter.JwtFilter;
 import smu.capstone.intrastructure.jwt.handler.JwtAccessDeniedHandler;
 import smu.capstone.intrastructure.jwt.handler.JwtAuthenticationEntryPoint;
 import smu.capstone.intrastructure.jwt.service.TokenProvider;
+import smu.capstone.intrastructure.jwt.service.TokenService;
 
 @Configuration
 @EnableWebSecurity
@@ -23,12 +25,13 @@ import smu.capstone.intrastructure.jwt.service.TokenProvider;
 public class SecurityConfig {
 
     private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
-    public JwtFilter jwtFilter(TokenProvider tokenProvider) {
-        return new JwtFilter(tokenProvider);
+    public JwtFilter jwtFilter() {
+        return new JwtFilter(tokenProvider, tokenService);
     }
 
     @Bean
@@ -62,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.OPTIONS,"/**").permitAll()
                         .anyRequest().authenticated());
 
         //세션 설정
@@ -71,7 +75,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         http
-                .addFilterBefore(jwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

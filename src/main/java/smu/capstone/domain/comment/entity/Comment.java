@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import smu.capstone.domain.board.dto.BoardRequestDto;
 import smu.capstone.domain.board.entity.Board;
 import smu.capstone.domain.member.entity.UserEntity;
 
@@ -29,4 +30,9 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;  // 댓글 작성자
+
+    public void update(String content) {
+        this.content = content;
+    }
+
 }

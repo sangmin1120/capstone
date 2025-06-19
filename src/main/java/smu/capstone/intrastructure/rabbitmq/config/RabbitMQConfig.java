@@ -10,6 +10,7 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.amqp.core.Queue;
 
 // baseScan으로 스캔 범위를 적용해주어야 됨
 @Configuration
