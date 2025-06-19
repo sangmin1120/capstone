@@ -31,7 +31,7 @@ public class ExerciseDiaryService {
         ExerciseDiary diary = ExerciseDiary.builder()
                 .user(user)
                 .content(requestDto.getContent())
-                .distance(requestDto.getDistance())
+                .description(requestDto.getDescription())
                 .build();
 
         return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
@@ -59,7 +59,7 @@ public class ExerciseDiaryService {
         }
 
         diary.setContent(requestDto.getContent());
-        diary.setDistance(requestDto.getDistance());
+        diary.setDescription(requestDto.getDescription());
 
         return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
     }
