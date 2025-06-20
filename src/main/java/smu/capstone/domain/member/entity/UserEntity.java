@@ -54,7 +54,7 @@ public class UserEntity extends BaseEntity {
         this.isDeleted = false;
     }
 
-    public void changeDate(AuthRequestDto.SignUp dto, PasswordEncoder passwordEncoder) {
+    public void changeData(AuthRequestDto.SignUp dto, PasswordEncoder passwordEncoder) {
         this.accountId = dto.getAccountId();
         this.password = passwordEncoder.encode(dto.getPassword());
         this.username = dto.getUsername();
