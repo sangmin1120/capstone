@@ -29,4 +29,6 @@ public class ExerciseDiary extends BaseEntity {
     @Column(nullable = true)
     private String description; // 이동 거리 (단위: km) - 지도 API 사용 예정
 
+    private Long sets;
+    private Long reps;
 }

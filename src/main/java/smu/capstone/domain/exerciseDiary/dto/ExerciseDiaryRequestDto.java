@@ -12,6 +12,8 @@ public class ExerciseDiaryRequestDto {
 
     private String content; // 운동 기록 내용
     private String description; // 이동 거리 (km) -> 기록 저장, 수정에서 사용?
+    private Long sets;
+    private Long reps;
     // private List<GPSLocation> locations;  // GPS 좌표 리스트 추가
     // GPSLocation 클래스 만들고 구현 시작해야함..
 }

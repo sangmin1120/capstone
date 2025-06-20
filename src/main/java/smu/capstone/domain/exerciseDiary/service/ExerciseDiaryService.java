@@ -32,6 +32,8 @@ public class ExerciseDiaryService {
                 .user(user)
                 .content(requestDto.getContent())
                 .description(requestDto.getDescription())
+                .sets(requestDto.getSets())
+                .reps(requestDto.getReps())
                 .build();
 
         return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
@@ -60,6 +62,8 @@ public class ExerciseDiaryService {
 
         diary.setContent(requestDto.getContent());
         diary.setDescription(requestDto.getDescription());
+        diary.setSets(requestDto.getSets());
+        diary.setReps(requestDto.getReps());
 
         return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
     }
