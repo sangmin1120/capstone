@@ -49,7 +49,7 @@ public class SignupService {
             // 탈퇴한 회원의 정보를 가져와서 복구
             user = userRepository.findByEmailAndIsDeleted(authRequestDto.getEmail(), true)
                     .orElseThrow(() -> new RestApiException(INVALID_ID_OR_PASSWORD));
-            user.changeDate(authRequestDto, passwordEncoder);
+            user.changeData(authRequestDto, passwordEncoder);
             user.restore();
         } else if (userRepository.existsByAccountIdAndIsDeleted(authRequestDto.getAccountId(), false)) { // 이메일 중복
             throw new RestApiException(DUPLICATED_ID);
