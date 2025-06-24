@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.domain.exerciseDiary.dto.WalkCompleteRequestDto;
 import smu.capstone.domain.exerciseDiary.entity.ExerciseDiary;
 import smu.capstone.domain.exerciseDiary.repository.ExerciseDiaryRepository;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryRequestDto;
@@ -11,6 +12,7 @@ import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryResponseDto;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.service.InfoService;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +25,7 @@ public class ExerciseDiaryService {
 
     private final ExerciseDiaryRepository exerciseDiaryRepository;
     private final InfoService infoService;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     // 운동 기록 작성
     public ExerciseDiaryResponseDto createExerciseDiary(ExerciseDiaryRequestDto requestDto) {
@@ -34,6 +37,23 @@ public class ExerciseDiaryService {
                 .description(requestDto.getDescription())
                 .sets(requestDto.getSets())
                 .reps(requestDto.getReps())
+                .build();
+
+        return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
+    }
+
+    // 이동 거리 -> 운동 기록 만들어 주기
+    public ExerciseDiaryResponseDto createExerciseDiary(WalkCompleteRequestDto requestDto) {
+        UserEntity user = infoService.getCurrentUser();
+
+        ExerciseDiary diary = ExerciseDiary.builder()
+                .user(user)
+                .content(requestDto.getDistance() + "이동")
+                .description(requestDto.getStartTime().format(formatter) + " 부터 "
+                        + requestDto.getEndTime().format(formatter) + "까지 총 "
+                        + requestDto.getDistance() + " 이동")
+                .sets(1L)
+                .reps(1L)
                 .build();
 
         return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
