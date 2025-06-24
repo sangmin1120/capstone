@@ -1,49 +1,73 @@
 package smu.capstone.domain.exerciseDiary.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import smu.capstone.common.response.BaseResponse;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryRequestDto;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryResponseDto;
+import smu.capstone.domain.exerciseDiary.entity.ExerciseDiary;
 import smu.capstone.domain.exerciseDiary.service.ExerciseDiaryService;
+import smu.capstone.domain.member.entity.UserEntity;
+import smu.capstone.domain.member.service.InfoService;
 
+import java.time.LocalDate;
 import java.util.List;
 
+
 @RestController
-@RequestMapping("/api/exercise")
+@RequestMapping("/api/diaries")
 @RequiredArgsConstructor
 public class ExerciseDiaryController {
 
-    private final ExerciseDiaryService exerciseDiaryService;
+    private final ExerciseDiaryService diaryService;
 
+    /**
+     * 재활일기 등록
+     * POST /api/diaries
+     */
     @PostMapping
-    public BaseResponse<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto requestDto) {
-        ExerciseDiaryResponseDto response = exerciseDiaryService.createExerciseDiary(requestDto);
-        return BaseResponse.ok(response);
+    public ResponseEntity<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto request) {
+        ExerciseDiaryResponseDto response = diaryService.createDiary(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    // 사용자의 모든 운동 기록 조회
-    @GetMapping
-    public BaseResponse<List<ExerciseDiaryResponseDto>> getUserDiaries() {
-        List<ExerciseDiaryResponseDto> diaries = exerciseDiaryService.getUserDiaries();
-        return BaseResponse.ok(diaries);
+    /**
+     * 로그인한 유저의 재활일기 목록 조회
+     * GET /api/diaries/my
+     */
+    @GetMapping("/my")
+    public ResponseEntity<List<ExerciseDiaryResponseDto>> getMyDiaries() {
+        List<ExerciseDiaryResponseDto> diaries = diaryService.getMyDiaries();
+        return ResponseEntity.ok(diaries);
     }
 
-    // 운동 기록 수정
-    @PutMapping("/{diaryId}")
-    public BaseResponse<ExerciseDiaryResponseDto> updateDiary(
-            @PathVariable("diaryId") Long diaryId,
-            @RequestBody ExerciseDiaryRequestDto requestDto, HttpServletRequest request) {
-        ExerciseDiaryResponseDto updatedDiary = exerciseDiaryService.updateDiary(diaryId, requestDto);
-        return BaseResponse.ok(updatedDiary);
-    }
-
-    // 운동 기록 삭제
     @DeleteMapping("/{diaryId}")
-    public BaseResponse<String> deleteDiary(@PathVariable("diaryId") Long diaryId) {
-        exerciseDiaryService.deleteDiary(diaryId);
-        return BaseResponse.ok("운동 기록이 삭제되었습니다.");
+    public ResponseEntity<Void> deleteDiary(@PathVariable("diaryId") Long diaryId) {
+        diaryService.deleteDiary(diaryId);
+        return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{diaryId}")
+    public ResponseEntity<Void> updateDiary(
+            @PathVariable Long diaryId,
+            @RequestBody ExerciseDiaryRequestDto requestDto) {
+        diaryService.updateDiary(diaryId, requestDto);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/date")
+    public ResponseEntity<ExerciseDiaryResponseDto> getDiariesByDate(
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        ExerciseDiaryResponseDto diaries = diaryService.getDiaryByDate(date);
+        return ResponseEntity.ok(diaries);
+    }
+
+
+
 }
+
+
 
