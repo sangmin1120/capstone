@@ -45,9 +45,10 @@ public class CommentService {
 
         Comment comment = Comment.builder()
                 .content(requestDto.getContent())
-                .board(board)
                 .user(user)
                 .build();
+
+        board.addComment(comment); // 양방향 유지
 
         // 댓글 저장
         commentRepository.save(comment);
