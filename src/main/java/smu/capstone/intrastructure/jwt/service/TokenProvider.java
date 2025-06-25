@@ -114,7 +114,6 @@ public class TokenProvider {
     public String getAccessToken(HttpServletRequest request) {
         String token = Optional.ofNullable(request.getHeader(HttpHeaders.AUTHORIZATION)).
                 orElse(request.getHeader("authorization"));
-        System.out.println("[getAccessToken]" + token);
 
         if (!StringUtils.hasText(token)) {
             throw new RestApiException(AUTHORIZATION_REQUIRED);
