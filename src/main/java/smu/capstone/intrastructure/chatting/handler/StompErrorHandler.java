@@ -15,6 +15,7 @@ import org.springframework.web.socket.messaging.StompSubProtocolErrorHandler;
 import smu.capstone.common.errorcode.CommonStatusCode;
 import smu.capstone.common.errorcode.StatusCode;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.domain.chatroom.exception.ChatRoomException;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
@@ -35,6 +36,8 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
             if(cause instanceof AccessDeniedException) return sendErrorMessage(cause, CommonStatusCode.UNAUTHORIZED);
             else if(cause instanceof RestApiException) {
                 return sendErrorMessage(cause, ((RestApiException) cause).getStatusCode());
+            }else if(cause instanceof ChatRoomException){
+                return sendErrorMessage(cause, ((ChatRoomException) cause).getStatusCode());
             }
         }
         return super.handleClientMessageProcessingError(clientMessage, ex);

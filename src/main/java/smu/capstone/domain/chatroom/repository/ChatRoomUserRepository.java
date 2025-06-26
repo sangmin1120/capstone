@@ -1,6 +1,5 @@
 package smu.capstone.domain.chatroom.repository;
 
-import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -28,11 +27,22 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Stri
         JOIN FETCH cr.chatRoomUsers cru2
         JOIN FETCH cru.userEntity m1
         JOIN FETCH cru2.userEntity m2
-        WHERE cru.userEntity.id = :userEntityId
+        WHERE cru.userEntity.id = :userEntityId AND cru.activation = 'ACTIVE'
     """)
-    Optional<List<ChatRoomUser>> findByUserEntity_Id(@Param("userEntityId")Long userEntityId);
+    List<ChatRoomUser> findByUserEntity_Id(@Param("userEntityId")Long userEntityId);
 
     List<ChatRoomUser> findByChatRoom_Id(String roomId);
 
-    boolean existsByChatRoom_IdAndUserEntity_accountId(String chatRoomId, String userEntityAccountId);
+    boolean existsByChatRoom_IdAndUserEntity_accountIdAndActivation(String chatRoomId, String userEntityAccountId, ChatRoomUser.Activation activation);
+
+    //객체 순환 조회 문제 생기므로 api 반환 시 주의
+    @Query("""
+        SELECT cru FROM ChatRoomUser cru
+        JOIN FETCH cru.chatRoom cr
+        JOIN FETCH cru.userEntity m
+        WHERE cru.chatRoom.id = :chatRoomId AND m.accountId <> :accountId
+        """)
+    Optional<ChatRoomUser> findOtherChatRoomUserByChatRoom_idAndUserEntity_AccountId(@Param("chatRoomId") String chatRoomId, @Param("accountId") String accountId);
+
+    Optional<ChatRoomUser> findByChatRoom_IdAndUserEntity_AccountId(String chatRoomId, String userEntityAccountId);
 }
