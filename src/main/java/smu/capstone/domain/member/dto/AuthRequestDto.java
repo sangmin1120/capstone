@@ -60,7 +60,7 @@ public class AuthRequestDto {
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Modify {
-
+        String currentPassword;
         String newPassword;
     }
 
