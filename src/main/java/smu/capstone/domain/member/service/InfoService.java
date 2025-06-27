@@ -32,6 +32,10 @@ public class InfoService {
 
         //1. 검증 + userid 가져오기
         UserEntity userEntity = getCurrentUser();
+        if (!passwordEncoder.matches(modifyDto.getCurrentPassword(), userEntity.getPassword())) {
+            throw new RestApiException(NOT_FOUND_USER);
+        }
+
         userEntity.setPassword(passwordEncoder.encode(modifyDto.getNewPassword()));
         userRepository.save(userEntity);
     }
