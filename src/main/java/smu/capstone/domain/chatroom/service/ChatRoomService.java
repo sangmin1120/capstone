@@ -1,14 +1,14 @@
 package smu.capstone.domain.chatroom.service;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Collation;
 import org.springframework.stereotype.Service;
 import smu.capstone.common.errorcode.ChatRoomExceptionCode;
 import smu.capstone.common.errorcode.CommonStatusCode;
+import smu.capstone.common.exception.RestApiException;
 import smu.capstone.domain.chat.domain.ChatMessage;
 import smu.capstone.domain.chat.repository.ChatMessageRepository;
 import smu.capstone.domain.chatroom.domain.ChatRoom;
@@ -21,6 +21,7 @@ import smu.capstone.domain.chatroom.repository.ChatRoomUserRepository;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -38,6 +39,9 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher publisher;
+    private final RedisTemplate<String, String> redisTemplete;
+
+    private static final String TIME_CACHE_KEY = "createAtCache";
 
     public List<ChatRoomDto> getChatRoomList() {
         //중복 - board 서비스와 반환값은 같은데 다른 함수를 사용 - ?
@@ -88,7 +92,72 @@ public class ChatRoomService {
                 .build();
     }
 
+    public MessageScrollResponseDto getMessageHistory(String roomId, String lastMessageId, String lastTime, int size) {
+        //밀리초 사용 위해 변환
+        try {
+            Long userId = getLoginMemberId();
+            LocalDateTime lastSentAt = (lastTime != null) ? LocalDateTime.parse(lastTime) : null;
 
+            //캐싱
+            String time = redisTemplete.opsForValue().get(TIME_CACHE_KEY+roomId+userId);
+            if (time == null) {
+                ChatRoomUser cru = chatRoomUserRepository.findByChatRoom_IdAndUserEntity_Id(roomId, userId).orElseThrow(
+                        () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
+                time = cru.getCreatedAt().toString();
+                redisTemplete.opsForValue().set(TIME_CACHE_KEY+roomId+userId, time);
+                redisTemplete.expire(TIME_CACHE_KEY+roomId+userId, Duration.ofMinutes(10));
+            }
+            LocalDateTime createAt = LocalDateTime.parse(time);
+
+            List<ChatMessage> messages;
+            if(lastMessageId == null ||  lastSentAt == null){
+                //첫 요청 시
+                messages = chatMessageRepository.findRecentMessage(roomId, createAt, size+1);
+            }
+            else {
+                messages = chatMessageRepository.findRecentMessage(roomId, createAt, lastMessageId, lastSentAt, size + 1);
+            }
+
+            //0인지 확인 메시지 있으면 Cursor 구성, 0이면 다르게 구성, null 넣기
+            boolean hasNext = messages.size() > size;
+            int idx = 0;
+
+            //채팅메시지가 있다면 idx 설정
+            if(!messages.isEmpty()) {
+                idx = messages.size() - 1;
+                if (hasNext) {
+                    messages.remove(idx);
+                    idx = messages.size() - 1;
+                }
+            }
+            return MessageScrollResponseDto.builder()
+                    .messages(messages)
+                    .nextCursor(getMessageCursor(idx, hasNext, messages))
+                    .build();
+        }catch (IllegalArgumentException e){
+            log.error(e.getMessage());
+            throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+        }
+        catch (RuntimeException e) {
+            log.error(e.getMessage());
+            throw new ChatRoomException(CommonStatusCode.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    protected MessageScrollResponseDto.MessageCursor getMessageCursor(int idx, boolean hasNext, List<ChatMessage> messages) {
+        if(messages.isEmpty()) {
+            return MessageScrollResponseDto.MessageCursor.builder()
+                    .hasNext(hasNext)
+                    .lastMessageId(null)
+                    .lastSentAt(null)
+                    .build();
+        }
+        return MessageScrollResponseDto.MessageCursor.builder()
+                .hasNext(hasNext)
+                .lastSentAt(messages.get(idx).getSentAt())
+                .lastMessageId(messages.get(idx).getId())
+                .build();
+    }
 
     //있다면 기존 RoomId 반환, 없다면 새로운 RoomId 생성 후 반환 - 유저 삭제 시 이벤트 리스너 필요
     public String createChatRoom(ChatRoomCreateDto createDto) {
@@ -185,19 +254,6 @@ public class ChatRoomService {
         } catch (Exception e) {
             log.error(e.getMessage());
             throw new ChatRoomException(CommonStatusCode.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    //해당 코드 수정
-    public List<ChatMessage> getMessageList(String chatRoomId, LocalDateTime time) {
-        try {
-            Collation collation = Collation.of("ko"); // 한국으로 로케일 설정
-            Sort sort = Sort.by(Sort.Order.desc("timestamp"));
-            return chatMessageRepository.findAllBychatRoomId(chatRoomId, time, sort, collation);
-        }
-        catch (Exception e){
-            log.info("error {} {} \n {}", e.getCause(), e.getMessage(), e.getStackTrace());
-            throw new ChatRoomException(CommonStatusCode.INVALID_PARAMETER);
         }
     }
 

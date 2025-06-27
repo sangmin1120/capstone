@@ -10,6 +10,7 @@ import smu.capstone.common.response.ChatRoomResponse;
 import smu.capstone.domain.chatroom.dto.ChatRoomCreateDto;
 import smu.capstone.domain.chatroom.dto.ChatRoomDto;
 import smu.capstone.domain.chatroom.dto.ChatRoomEnterDto;
+import smu.capstone.domain.chatroom.dto.MessageScrollResponseDto;
 import smu.capstone.domain.chatroom.service.ChatRoomService;
 
 import java.util.List;
@@ -42,6 +43,15 @@ public class ChatRoomController {
         //상대가 존재하지 않으면 null 값으로 반환
         ChatRoomEnterDto chatRoomEnterDto = chatRoomService.enterChatRoom(chatRoomId);
         return ChatRoomResponse.ok(CommonStatusCode.OK, chatRoomEnterDto);
+    }
+
+    //메시지 페이징
+    @GetMapping("/history/{chatRoomId}")
+    public BaseResponse<MessageScrollResponseDto> messageHistory(@PathVariable("chatRoomId") String chatRoomId,
+                                                                 @RequestParam(required = false) String lastMessageId,
+                                                                 @RequestParam(required = false) String lastSentAt,
+                                                                 @RequestParam(defaultValue = "20") int size) {
+        return BaseResponse.ok(chatRoomService.getMessageHistory(chatRoomId, lastMessageId, lastSentAt, size));
     }
 
     //채팅방 삭제
