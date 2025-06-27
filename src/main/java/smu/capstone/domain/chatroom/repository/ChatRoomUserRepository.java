@@ -1,6 +1,7 @@
 package smu.capstone.domain.chatroom.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.query.Param;
@@ -31,6 +32,8 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Stri
     """)
     List<ChatRoomUser> findByUserEntity_Id(@Param("userEntityId")Long userEntityId);
 
+    boolean existsByChatRoom_IdAndUserEntity_accountId(String chatRoomId, String userEntityAccountId);
+
     List<ChatRoomUser> findByChatRoom_Id(String roomId);
 
     boolean existsByChatRoom_IdAndUserEntity_accountIdAndActivation(String chatRoomId, String userEntityAccountId, ChatRoomUser.Activation activation);
@@ -45,4 +48,21 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Stri
     Optional<ChatRoomUser> findOtherChatRoomUserByChatRoom_idAndUserEntity_AccountId(@Param("chatRoomId") String chatRoomId, @Param("accountId") String accountId);
 
     Optional<ChatRoomUser> findByChatRoom_IdAndUserEntity_AccountId(String chatRoomId, String userEntityAccountId);
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE ChatRoomUser cru
+            SET cru.activation = 'UNAVAILABLE'
+            WHERE cru.userEntity.id = :userId
+            """)
+    void bulkChatRoomActivation(@Param("userId") Long userId);
+
+    @Modifying(clearAutomatically = true)
+    @Query("""
+            UPDATE ChatRoomUser cru
+            SET cru.isOpponentDeleted = true
+            WHERE cru.userEntity.id <> :userId AND cru.chatRoom.id IN (
+                        SELECT cru2.chatRoom.id FROM ChatRoomUser cru2
+                        WHERE cru2.userEntity.id = :userId )
+            """)
+    void bulkChatRoomOpponentDeleted(@Param("userId") Long userId);
 }

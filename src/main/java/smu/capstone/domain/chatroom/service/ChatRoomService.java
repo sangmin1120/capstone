@@ -96,10 +96,13 @@ public class ChatRoomService {
         //밀리초 사용 위해 변환
         try {
             Long userId = getLoginMemberId();
+            log.info("time {}", lastTime);
             LocalDateTime lastSentAt = (lastTime != null) ? LocalDateTime.parse(lastTime) : null;
+            log.info("lastSentAt {}", lastSentAt);
 
             //캐싱
             String time = redisTemplete.opsForValue().get(TIME_CACHE_KEY+roomId+userId);
+            log.info("time {}", time);
             if (time == null) {
                 ChatRoomUser cru = chatRoomUserRepository.findByChatRoom_IdAndUserEntity_Id(roomId, userId).orElseThrow(
                         () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
@@ -108,13 +111,15 @@ public class ChatRoomService {
                 redisTemplete.expire(TIME_CACHE_KEY+roomId+userId, Duration.ofMinutes(10));
             }
             LocalDateTime createAt = LocalDateTime.parse(time);
-
+            log.info("createAt {}", createAt);
             List<ChatMessage> messages;
             if(lastMessageId == null ||  lastSentAt == null){
                 //첫 요청 시
+                log.info("첫번째 요청");
                 messages = chatMessageRepository.findRecentMessage(roomId, createAt, size+1);
             }
             else {
+                log.info("다음 요청");
                 messages = chatMessageRepository.findRecentMessage(roomId, createAt, lastMessageId, lastSentAt, size + 1);
             }
 
@@ -124,8 +129,10 @@ public class ChatRoomService {
 
             //채팅메시지가 있다면 idx 설정
             if(!messages.isEmpty()) {
+                log.info("채팅 메시지 존재  {} {}", idx, messages.size());
                 idx = messages.size() - 1;
                 if (hasNext) {
+                    log.info("채팅 메시지 Next 존재,  {} {}", idx, messages.size());
                     messages.remove(idx);
                     idx = messages.size() - 1;
                 }
@@ -135,11 +142,11 @@ public class ChatRoomService {
                     .nextCursor(getMessageCursor(idx, hasNext, messages))
                     .build();
         }catch (IllegalArgumentException e){
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e.getCause(), e.getStackTrace());
             throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
         }
         catch (RuntimeException e) {
-            log.error(e.getMessage());
+            log.error(e.getMessage(), e.getCause(), e.getStackTrace());
             throw new ChatRoomException(CommonStatusCode.INTERNAL_SERVER_ERROR);
         }
     }

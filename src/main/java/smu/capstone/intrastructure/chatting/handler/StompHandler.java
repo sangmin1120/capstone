@@ -95,9 +95,17 @@ public class StompHandler implements ChannelInterceptor {
             redisSessionManager.putChatUserSession(roomId, username, accessor.getSessionId());
             log.info("현재 세션 {}", accessor.getSessionId());
         }
+//        else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+//            String roomId = extractRoomIdFromDestination(accessor.getDestination());
+//            //맞는지 검증
+//            if(roomId != null) {
+//                if(!chatRoomUserRepository.existsByChatRoom_IdAndUserEntity_accountId(roomId,accessor.getUser().getName())){
+//                    throw new RestApiException(CommonStatusCode.FORBIDDEN);
+//                }
+//            }
+//        }
         return message;
     }
-
     private String extractRoomIdFromDestination(String destination) {
         if(destination != null) {
             String[] parts = destination.split("/");
