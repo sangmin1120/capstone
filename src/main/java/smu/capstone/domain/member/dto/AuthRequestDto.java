@@ -108,4 +108,14 @@ public class AuthRequestDto {
                     .build();
         }
     }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class ProfileFile {
+        String filename;
+        String prefix;
+    }
 }

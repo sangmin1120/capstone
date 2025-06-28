@@ -3,13 +3,12 @@ package smu.capstone.domain.member.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import smu.capstone.common.response.BaseResponse;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.service.InfoService;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user-info")
@@ -40,5 +39,19 @@ public class InfoController {
     public BaseResponse<Void> userDelete(HttpServletRequest request) {
         infoService.delete(request);
         return BaseResponse.ok();
+    }
+
+    @PostMapping("/upload-profileImg")
+    public BaseResponse<Map<String,String>> uploadProfile(@RequestBody AuthRequestDto.ProfileFile profileFile) {
+        Map<String, String> profileFileMap = infoService.uploadProfileFile(profileFile);
+
+        return BaseResponse.ok(profileFileMap);
+    }
+
+    @GetMapping("/get-profileImg")
+    public BaseResponse<String> getProfileImg() {
+        String profileImgUrl = infoService.getProfileImg();
+
+        return BaseResponse.ok(profileImgUrl);
     }
 }

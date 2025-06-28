@@ -21,7 +21,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public BaseResponse<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public BaseResponse<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e, HttpServletResponse response) {
+
+        response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
         return BaseResponse.fail(CommonStatusCode.VALIDATION_FAILED, e.getBindingResult());
     }
 }

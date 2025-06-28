@@ -19,10 +19,10 @@ public class S3Service {
     public Map<String, String> createUploadPresignedUrl(String prefix, String filename){
         //파일 확장자 검사
         if(prefix == null || filename == null){
-            throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+            throw new RestApiException(CommonStatusCode.NOT_FOUND_PARAM_S3);
         }
         if(!validationFilename(prefix, filename)){
-            throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+            throw new RestApiException(CommonStatusCode.INVALID_PARAM_S3);
         }
         return s3Util.createPutPresignedUrl(prefix, filename);
     }
@@ -36,7 +36,7 @@ public class S3Service {
 
     public String createGetUrl(String key){
         if(key == null){
-            throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+            throw new RestApiException(CommonStatusCode.NOT_FOUND_IMG);
         }
         if(!validationImgFile(key)){
             log.error("file error: 이미지만 가능 {}", key);

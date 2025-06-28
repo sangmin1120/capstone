@@ -15,6 +15,10 @@ public enum CommonStatusCode implements StatusCode{
     FORBIDDEN(HttpStatus.FORBIDDEN, "C403", "권한이 없습니다."),
     NOT_FOUND(HttpStatus.NOT_FOUND, "C404", "리소스가 존재하지 않습니다."),
 
+    INVALID_PARAM_S3(HttpStatus.BAD_REQUEST, "S404-1","파일이 error 않습니다."),
+    NOT_FOUND_PARAM_S3(HttpStatus.BAD_REQUEST, "S404-2","파일이 존재하지 않습니다."),
+    NOT_FOUND_IMG(HttpStatus.BAD_REQUEST, "S404-3","이미지가 존재하지 않습니다."),
+
     NOT_FOUND_BOARD_TYPE(HttpStatus.NOT_FOUND,"C404-1","BoardType 존재하지 않습니다."),
     NOT_FOUND_BOARD_ID(HttpStatus.NOT_FOUND,"C404-2","게시글이 존재하지 않습니다."),
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "C404-3","사용자가 존재하지 않습니다."),
