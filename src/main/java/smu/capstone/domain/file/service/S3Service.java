@@ -36,7 +36,8 @@ public class S3Service {
 
     public String createGetUrl(String key){
         if(key == null){
-            throw new RestApiException(CommonStatusCode.NOT_FOUND_IMG);
+//            throw new RestApiException(CommonStatusCode.NOT_FOUND_IMG);
+            return null;
         }
         if(!validationImgFile(key)){
             log.error("file error: 이미지만 가능 {}", key);
