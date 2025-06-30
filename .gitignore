@@ -49,3 +49,7 @@ docker-compose.yml
 
 # Ignore everything in resources
 src/main/resources/
+
+#민감 인증 파일
+*.pem
+*.key

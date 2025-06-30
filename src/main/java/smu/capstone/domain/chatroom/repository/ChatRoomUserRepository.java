@@ -1,5 +1,6 @@
 package smu.capstone.domain.chatroom.repository;
 
+import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
@@ -32,4 +33,6 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Stri
     Optional<List<ChatRoomUser>> findByUserEntity_Id(@Param("userEntityId")Long userEntityId);
 
     List<ChatRoomUser> findByChatRoom_Id(String roomId);
+
+    boolean existsByChatRoom_IdAndUserEntity_accountId(String chatRoomId, String userEntityAccountId);
 }

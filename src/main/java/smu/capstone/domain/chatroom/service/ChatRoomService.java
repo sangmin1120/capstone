@@ -1,8 +1,9 @@
 package smu.capstone.domain.chatroom.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Collation;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import smu.capstone.domain.chat.repository.ChatMessageRepository;
 import smu.capstone.domain.chatroom.domain.ChatRoom;
 import smu.capstone.domain.chatroom.domain.ChatRoomUser;
 import smu.capstone.domain.chatroom.dto.*;
+import smu.capstone.domain.chatroom.event.ChatMessageFileEvent;
 import smu.capstone.domain.chatroom.exception.ChatRoomException;
 import smu.capstone.domain.chatroom.repository.ChatRoomRepository;
 import smu.capstone.domain.chatroom.repository.ChatRoomUserRepository;
@@ -38,6 +40,7 @@ public class ChatRoomService {
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher publisher;
 
     public List<ChatRoomDto> getChatRoomList() {
         Long userId = getLoginMemberId();
@@ -58,6 +61,7 @@ public class ChatRoomService {
 
     public ChatRoomEnterDto enterChatRoom(String roomId) {
         Long userId = getLoginMemberId();
+//        log.info("userId: {}", userId);
         if(roomId == null || userId == null) {
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ALL);
         }
@@ -137,23 +141,31 @@ public class ChatRoomService {
             ChatRoomUser chatRoomUser = userPair.getChatRoomUser();
             ChatRoomUser chatRoomOther = userPair.getOtherChatRoomUser();
 
+            //ChatRoomUser객체 자체가 null일 경우 -> 에러 표시
             if(chatRoomUser == null || chatRoomOther == null) {
                 throw new ChatRoomException(CommonStatusCode.NOT_FOUND);
             }
 
-            //상대 user의 채팅방이 ACTIVE 상태라면 user의 채팅방만 비활성화
-            if (isUserActive(chatRoomOther)) {
+            //ACTIVE 상태라면 user의 채팅방만 비활성화
+            //데이터 정합성이 깨져 상대는 탈퇴했는데도 chatRoomOther의 Active값이 활성화 상태라면 상대가 탈퇴해서 이미 없으므로 바로 삭제
+            if (chatRoomOther.getUserEntity() != null && isUserActive(chatRoomOther)) {
                 chatRoomUser.setActivation(ChatRoomUser.Activation.INACTIVE);
                 chatRoomUser.setCreatedAt(LocalDateTime.now());
                 chatRoomUser.setNotReadCount(0);
                 chatRoomUserRepository.save(chatRoomUser);
                 return;
             }
+            //삭제 전 이벤트 생성
+            ChatMessageFileEvent event = new ChatMessageFileEvent(roomId);
 
             chatMessageRepository.deleteAllByChatRoomId(chatRoom.getId());
             chatRoomUserRepository.delete(chatRoomOther);
             chatRoomUserRepository.delete(chatRoomUser);
             chatRoomRepository.delete(chatRoom);
+
+            //삭제 commit 성공 이벤트 발행
+            publisher.publishEvent(event);
+
         }catch (NullPointerException e){
             throw new ChatRoomException(CommonStatusCode.INVALID_PARAMETER);
         } catch (ChatRoomException e) {
@@ -172,6 +184,7 @@ public class ChatRoomService {
             return chatMessageRepository.findAllBychatRoomId(chatRoomId, time, sort, collation);
         }
         catch (Exception e){
+            log.info("error {} {} \n {}", e.getCause(), e.getMessage(), e.getStackTrace());
             throw new ChatRoomException(CommonStatusCode.INVALID_PARAMETER);
         }
     }

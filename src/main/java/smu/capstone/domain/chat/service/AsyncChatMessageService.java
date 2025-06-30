@@ -1,6 +1,5 @@
 package smu.capstone.domain.chat.service;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,9 +18,7 @@ import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
 import smu.capstone.intrastructure.chatting.util.RedisSessionManager;
 import smu.capstone.intrastructure.fcm.dto.MessageNotification;
-import smu.capstone.intrastructure.fcm.dto.NotificationMulticastRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -37,11 +34,11 @@ public class AsyncChatMessageService {
     private final AlarmService alarmService;
 
     @Async
-    @Transactional
     public void saveChatMessage(ChatMessage chatMessage) {
         try {
             chatMessageRepository.save(chatMessage);
             log.info("메시지 저장 완료: {}", chatMessage.getMessage());
+            //throw new Exception("메시지 일부러 실패해봄");
         } catch (Exception e) {
             log.error("메시지 저장 실패", e);
             throw new ChatException(ChatExceptionCode.MESSAGE_SAVE_FAILED);
@@ -49,7 +46,6 @@ public class AsyncChatMessageService {
     }
 
     @Async
-    @Transactional
     /*메시지 관련 정보 비동기 업데이트 - notReadCnt, Activation 업데이트*/
     public void updateChatRoomInfo(ChatMessage message) {
 
