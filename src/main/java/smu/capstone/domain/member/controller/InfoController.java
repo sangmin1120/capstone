@@ -45,13 +45,13 @@ public class InfoController {
     public BaseResponse<Map<String,String>> uploadProfile(@RequestBody AuthRequestDto.ProfileFile profileFile) {
         Map<String, String> profileFileMap = infoService.uploadProfileFile(profileFile);
 
-        return BaseResponse.ok(profileFileMap);
+        return BaseResponse.ok(profileFileMap); // signedUrl, key 반환
     }
 
     @GetMapping("/get-profileImg")
     public BaseResponse<String> getProfileImg() {
         String profileImgUrl = infoService.getProfileImg();
 
-        return BaseResponse.ok(profileImgUrl);
+        return BaseResponse.ok(profileImgUrl); // signedUrl 반환
     }
 }

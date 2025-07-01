@@ -7,6 +7,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import smu.capstone.common.exception.RestApiException;
+import smu.capstone.domain.file.dto.UrlResponseDto;
 import smu.capstone.domain.file.service.S3Service;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.dto.AuthRequestDto;
@@ -15,6 +16,7 @@ import smu.capstone.domain.member.util.LoginUserUtil;
 import smu.capstone.intrastructure.jwt.service.TokenProvider;
 import smu.capstone.intrastructure.jwt.service.TokenService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static smu.capstone.common.errorcode.CommonStatusCode.NOT_FOUND_USER;
@@ -64,8 +66,12 @@ public class InfoService {
     public Map<String,String> uploadProfileFile(AuthRequestDto.ProfileFile profileFile) {
 
         // 1. preSignedUrl 가져오기
-        Map<String, String> profileFileMap
+        UrlResponseDto urlResponseDto
                 = s3Service.createUploadPresignedUrl(profileFile.getPrefix(), profileFile.getFilename());
+
+        Map<String, String> profileFileMap = new HashMap<>();
+        profileFileMap.put("fileUrl", urlResponseDto.getPresignedUrl());
+        profileFileMap.put("fileKey", urlResponseDto.getKey());
 
         // 2. 백엔드에 저장
         UserEntity user = getCurrentUser();
