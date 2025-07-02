@@ -55,7 +55,13 @@ public class StompHandler implements ChannelInterceptor {
                 throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
             }
 
-            String accessToken = authHeader.substring("Bearer ".length());
+            //NPE 처리 및 인가
+            String accessToken;
+            try {
+                accessToken = authHeader.substring("Bearer ".length());
+            } catch (Exception e) {
+                throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+            }
             tokenProvider.validateToken(TokenType.ACCESS_TOKEN, accessToken);
 
             //Principal 등록
@@ -106,6 +112,7 @@ public class StompHandler implements ChannelInterceptor {
 //        }
         return message;
     }
+    //"" 일 때 에러처리 필요 try로 잡을 것 이제보니 jwt 파싱 오류엿네 ㄷㄷ; try로 restapi 잡고 가기 room은 401 던져서 ㄱㅊ
     private String extractRoomIdFromDestination(String destination) {
         if(destination != null) {
             String[] parts = destination.split("/");

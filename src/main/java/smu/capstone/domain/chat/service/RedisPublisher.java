@@ -23,6 +23,7 @@ public class RedisPublisher {
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChannelTopic channelTopic;
     private final AsyncChatMessageService asyncChatMessageService;
+    //private final ChatMessageRepository chatMessageRepository;
 
     public void publish(ChatMessageDto chatMessageDto) {
 
@@ -32,23 +33,28 @@ public class RedisPublisher {
         if(chatMessage == null) {
             throw new ChatException(ChatExceptionCode.DATA_BIND_ERROR);
         }
-        //레디스 메시지 전송
-        sendMessageToRedis(chatMessage);
-
-        log.info("전송 성공");
-        //전송 성공 시에만 저장 시도
-        asyncChatMessageService.saveChatMessage(chatMessage);
-        asyncChatMessageService.updateChatRoomInfo(chatMessage);
+        try {
+            //저장은 동기로 실행 - 실패 시
+            //chatMessageRepository.save(chatMessage);
+            //레디스 메시지 전송
+            sendMessageToRedis(chatMessage);
+            log.info("전송 성공");
+            //메시지 갱신
+            asyncChatMessageService.saveChatMessage(chatMessage);
+            asyncChatMessageService.updateChatRoomInfo(chatMessage);
+        }catch (RedisException | SerializationException e) {
+            log.warn("[RedisPublisher]: 채팅 전송 실패, Redis 오류: {} {}", e.getCause(), e.getMessage());
+            throw new ChatException(ChatExceptionCode.MESSAGE_SENDING_FAILED);
+        }
+        catch (Exception e){
+            log.error("[RedisPublisher]: 채팅 publishser 실패: {} {}", e.getCause(), e.getMessage());
+            throw new ChatException(ChatExceptionCode.INTERNAL_SERVER_ERROR);
+        }
     }
 
     //만약 UserId로 설정할 경우 - 다른 User정보를 프론트에서 가지고 있어야 함
     private void sendMessageToRedis(ChatMessage chatMessage) {
-        try {
             redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessage);
-        } catch (RedisException | SerializationException e) {
-            log.error("Redis 전송 실패: {}", e.getMessage());
-            throw new ChatException(ChatExceptionCode.MESSAGE_SENDING_FAILED);
-        }
     }
 
     private void validateMessage(ChatMessageDto chatMessageDto) {

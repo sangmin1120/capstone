@@ -241,6 +241,8 @@ public class ChatRoomService {
             chatRoomUser.setActivation(ChatRoomUser.Activation.UNAVAILABLE);
             chatRoomUserRepository.save(chatRoomUser);
 
+            //채팅방에서 파일 모두 삭제
+            chatMessageRepository.findAllFileMessagesByChatRoomId(roomId);
             //개인정보 보호 위해 S3 파일은 삭제
             publisher.publishEvent(event);
 /***

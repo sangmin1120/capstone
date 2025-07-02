@@ -51,7 +51,6 @@ public class AsyncChatMessageService {
 
         //현재 채팅 세션에 참여인원이 1명(본인)이면 채팅방 업데이트/메시지 업데이트/알림메시지전송 진행
         if(redisSessionManager.isAloneInRoom(message.getChatRoomId()) ){
-
 //            List<ChatRoomUser> chatRoomUserList = chatRoomUserRepository.findByChatRoom_Id(message.getChatRoomId());
 //            if (chatRoomUserList == null || chatRoomUserList.isEmpty()) {
 //                log.error("No chat room user found");
@@ -62,6 +61,10 @@ public class AsyncChatMessageService {
 //            UserEntity user = userRepository.findByAccountId(message.getSender()).orElseThrow( // 이부분 sender --------------------- AccountId를 넣어줘야됨
 //                    () -> new ChatException(ChatExceptionCode.USER_NOT_FOUND));
 //            ChatRoomUser other = ChatRoomUserPair.getPair(user.getId(), chatRoomUserList).getOtherChatRoomUser();
+            //test
+//            if(true){
+//                throw new ChatException(ChatExceptionCode.MESSAGE_SENDING_FAILED);
+//            }
             ChatRoomUser other = chatRoomUserRepository.
                     findOtherChatRoomUserByChatRoom_idAndUserEntity_AccountId(message.getChatRoomId(),
                             message.getSender()).orElseGet( () ->
@@ -73,16 +76,6 @@ public class AsyncChatMessageService {
             //상대 사용자가 없다면 에러메시지 전송
             if(other == null || other.getUserEntity() == null){
                 throw new ChatException(ChatExceptionCode.USER_NOT_FOUND);
-            }
-
-            //다중 기기 알람 구현 시 for로 token list 조회 필요
-            //토큰 얻음
-            String alramToken = other.getUserEntity().getFcmToken();
-
-            //알림 메시지 생성 후 전송
-            if(alramToken != null){
-                alarmService.sendMessage(MessageNotification.of(alramToken,
-                        "새 채팅", message.getSender()+"님이 보낸 채팅입니다."));
             }
 
             //상대 채팅방이 비활성화 상태라면 활성화
@@ -97,6 +90,14 @@ public class AsyncChatMessageService {
             }catch (Exception e) {
                 log.error("error:{}, exception: {}", e.getMessage(), e.getCause().toString(), e);
                 throw new ChatException(ChatExceptionCode.MESSAGE_SAVE_FAILED);
+            }
+            //모두 저장한 후 메시지 전송
+            //토큰 얻음
+            String alramToken = other.getUserEntity().getFcmToken();
+            //알림 메시지 생성 후 전송
+            if(alramToken != null){
+                alarmService.sendMessage(MessageNotification.of(alramToken,
+                        "새 채팅", message.getSender()+"님이 보낸 채팅입니다."));
             }
         }
 

@@ -30,7 +30,7 @@ import static smu.capstone.intrastructure.jwt.TokenType.REFRESH_TOKEN;
 
 @Service
 @RequiredArgsConstructor
-public class LoginService {
+public class   LoginService {
     private final TokenProvider tokenProvider;
 
     private final UserRepository userRepository;

@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.data.repository.query.Param;
 import smu.capstone.domain.chatroom.domain.ChatRoomUser;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,4 +66,17 @@ public interface ChatRoomUserRepository extends JpaRepository<ChatRoomUser, Stri
                         WHERE cru2.userEntity.id = :userId )
             """)
     void bulkChatRoomOpponentDeleted(@Param("userId") Long userId);
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = """
+            UPDATE ChatRoomUser cru
+            SET cru.activation = 'ACTIVE'
+            WHERE cru.userEntity.accountId <> :userId
+                          AND cru.activation = 'INACTIVE'
+                          AND cru.chatRoom.id = :roomId
+                          AND cru.createdAt < :sentAt
+            """)
+    void afterChatRoomUpdate(@Param("userId") String userId,
+                            @Param("roomId") String roomId,
+                            @Param("sentAt") LocalDateTime sentAt);
 }

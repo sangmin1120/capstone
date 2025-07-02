@@ -25,8 +25,8 @@ import smu.capstone.intrastructure.chatting.util.SessionManager;
 @EnableWebSocketMessageBroker   //웹소켓 활성화
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private static long STOMP_HEARTBEAT_TO_CLIENT = 10000;   //서버가 보내는 pong: 10초 체크
-    private static long STOMP_HEARTBEAT_FROM_CLIENT = 60000; //클라이언트가 보내는 ping: 60초 체크
+    private final static long STOMP_HEARTBEAT_TO_CLIENT = 10000;   //서버가 보내는 pong: 10초 체크
+    private final static long STOMP_HEARTBEAT_FROM_CLIENT = 60000; //클라이언트가 보내는 ping: 60초 체크
 
     private final SessionManager sessionManager;
     private final StompHandler stompHandler;
@@ -35,7 +35,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("*") // CORS 문제 해결
+                .setAllowedOriginPatterns("http://localhost:3000") // CORS 문제 해결
         ;//.withSockJS();
         registry.setErrorHandler(stompErrorHander);
     }

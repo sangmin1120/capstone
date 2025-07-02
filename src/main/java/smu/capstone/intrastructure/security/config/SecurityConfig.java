@@ -38,6 +38,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         //csrf disable
         http
+                //.cors(Customizer.withDefaults())
                 .csrf((auth) -> auth.disable());
 
 
@@ -61,7 +62,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((auth) -> auth
                         .requestMatchers("/api/user-auth/**", "/api/user-search/**").permitAll()
-                        .requestMatchers("/ws-chat").permitAll()  // 웹소켓 엔드포인트 허용
+                        .requestMatchers("/ws-chat/**").permitAll()  // 웹소켓 엔드포인트 허용
                         .requestMatchers("/error/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
