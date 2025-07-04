@@ -38,7 +38,6 @@ public class RedisPublisher {
             //chatMessageRepository.save(chatMessage);
             //레디스 메시지 전송
             sendMessageToRedis(chatMessage);
-            log.info("전송 성공");
             //메시지 갱신
             asyncChatMessageService.saveChatMessage(chatMessage);
             asyncChatMessageService.updateChatRoomInfo(chatMessage);

@@ -11,7 +11,6 @@ import smu.capstone.domain.chat.domain.ChatMessage;
 import java.lang.reflect.Method;
 import java.time.Duration;
 
-//TODO: 비동기 에러 catch해 Retry 로직 시도 필요, 필요할 경우 마스킹 처리
 @Slf4j
 @RequiredArgsConstructor
 public class AsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
@@ -26,7 +25,7 @@ public class AsyncExceptionHandler implements AsyncUncaughtExceptionHandler {
         log.warn("비동기 예외 발생 exception {} method {} params {}", ex, method, params);
         if (ex instanceof ChatException chatex) {
             if (!ChatExceptionCode.MESSAGE_SENDING_FAILED.code().equals(chatex.getCode().code())) {
-                log.warn("[AsyncExceptionHandler]: C4020 예외는 DLQ 제외");
+                log.warn("[AsyncExceptionHandler]: C4020 이외는 DLQ 제외");
                 return;
             }
         }
