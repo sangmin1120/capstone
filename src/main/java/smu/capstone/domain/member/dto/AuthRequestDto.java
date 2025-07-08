@@ -60,7 +60,7 @@ public class AuthRequestDto {
     @Getter
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class Modify {
-
+        String currentPassword;
         String newPassword;
     }
 
@@ -107,5 +107,15 @@ public class AuthRequestDto {
                     .userType(userEntity.getUserType())
                     .build();
         }
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class ProfileFile {
+        String filename;
+        String prefix;
     }
 }

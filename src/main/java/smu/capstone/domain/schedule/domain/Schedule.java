@@ -46,7 +46,7 @@ public class Schedule {
 
     // 알림 메일 전송 여부
     @Builder.Default
-    @Column(name = "alert_sent", nullable = false)
+    @Column(name = "alert_sent")
     private boolean alertSent = false;
 }
 

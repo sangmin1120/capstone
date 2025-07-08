@@ -1,10 +1,7 @@
 package smu.capstone.domain.comment.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import smu.capstone.domain.board.dto.BoardRequestDto;
 import smu.capstone.domain.board.entity.Board;
 import smu.capstone.domain.member.entity.UserEntity;
@@ -12,6 +9,7 @@ import smu.capstone.domain.member.entity.UserEntity;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Setter
 @Getter
 @Entity
 public class Comment {

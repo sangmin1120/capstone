@@ -45,9 +45,10 @@ public class CommentService {
 
         Comment comment = Comment.builder()
                 .content(requestDto.getContent())
-                .board(board)
                 .user(user)
                 .build();
+
+        board.addComment(comment); // 양방향 유지
 
         // 댓글 저장
         commentRepository.save(comment);
@@ -95,6 +96,7 @@ public class CommentService {
                 .orElseThrow(() -> new RestApiException(NOT_FOUND_BOARD_ID))
                 .getUser();
 
+        // todo: 수정해야됨 -> 게시글 작성자한테는 알람이 안감
         if (!boardAuthor.equals(author)) {
             String token = boardAuthor.getFcmToken();
             if (token != null && !token.isEmpty()) {
