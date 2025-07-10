@@ -1,19 +1,13 @@
 package smu.capstone.domain.exerciseDiary.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import smu.capstone.common.response.BaseResponse;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryRequestDto;
 import smu.capstone.domain.exerciseDiary.dto.ExerciseDiaryResponseDto;
-import smu.capstone.domain.exerciseDiary.entity.ExerciseDiary;
 import smu.capstone.domain.exerciseDiary.service.ExerciseDiaryService;
-import smu.capstone.domain.member.entity.UserEntity;
-import smu.capstone.domain.member.service.InfoService;
 
-import java.time.LocalDate;
 import java.util.List;
 
 
@@ -30,7 +24,7 @@ public class ExerciseDiaryController {
      */
     @PostMapping
     public ResponseEntity<ExerciseDiaryResponseDto> createDiary(@RequestBody ExerciseDiaryRequestDto request) {
-        ExerciseDiaryResponseDto response = diaryService.createDiary(request);
+        ExerciseDiaryResponseDto response = diaryService.createExerciseDiary(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -40,7 +34,7 @@ public class ExerciseDiaryController {
      */
     @GetMapping("/my")
     public ResponseEntity<List<ExerciseDiaryResponseDto>> getMyDiaries() {
-        List<ExerciseDiaryResponseDto> diaries = diaryService.getMyDiaries();
+        List<ExerciseDiaryResponseDto> diaries = diaryService.getUserDiaries();
         return ResponseEntity.ok(diaries);
     }
 
@@ -57,16 +51,6 @@ public class ExerciseDiaryController {
         diaryService.updateDiary(diaryId, requestDto);
         return ResponseEntity.ok().build();
     }
-
-    @GetMapping("/date")
-    public ResponseEntity<ExerciseDiaryResponseDto> getDiariesByDate(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        ExerciseDiaryResponseDto diaries = diaryService.getDiaryByDate(date);
-        return ResponseEntity.ok(diaries);
-    }
-
-
-
 }
 
 
