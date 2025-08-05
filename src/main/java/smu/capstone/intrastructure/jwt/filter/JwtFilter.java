@@ -38,6 +38,11 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        // 웹소켓 인증 필터 패스
+        if(path.startsWith("/ws-chat/")){
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         try {
             String accessToken = tokenProvider.getAccessToken(request);
@@ -54,6 +59,8 @@ public class JwtFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         catch (RestApiException e) {
+            log.error("token: "+request.getCookies());
+            log.error("Token error: {} {} {}", e.getMessage(), e.getStatusCode().message(), e.getCause());
             log.error("[JwtFilter] Token validation failed", e);
         }
         filterChain.doFilter(request, response);
