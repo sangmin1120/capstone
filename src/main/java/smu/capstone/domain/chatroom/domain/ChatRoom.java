@@ -20,6 +20,7 @@ public class ChatRoom {
     @Id
     private String id;  //UUID.ramdomUUID().toString()으로 생성
     private LocalDateTime lastMessageAt;    //해당 값을 기준으로 리스트 갱신
+    private String lastMessage;             //마지막 메시지 표시
     @OneToMany(mappedBy = "chatRoom")
     private List<ChatRoomUser> chatRoomUsers;
 

@@ -96,13 +96,13 @@ public class ChatRoomService {
         //밀리초 사용 위해 변환
         try {
             Long userId = getLoginMemberId();
-            log.info("time {}", lastTime);
+            //log.info("time {}", lastTime);
             LocalDateTime lastSentAt = (lastTime != null) ? LocalDateTime.parse(lastTime) : null;
-            log.info("lastSentAt {}", lastSentAt);
+            //log.info("lastSentAt {}", lastSentAt);
 
             //캐싱
             String time = redisTemplete.opsForValue().get(TIME_CACHE_KEY+roomId+userId);
-            log.info("time {}", time);
+            //log.info("time {}", time);
             if (time == null) {
                 ChatRoomUser cru = chatRoomUserRepository.findByChatRoom_IdAndUserEntity_Id(roomId, userId).orElseThrow(
                         () -> new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_ROOM));
@@ -111,15 +111,15 @@ public class ChatRoomService {
                 redisTemplete.expire(TIME_CACHE_KEY+roomId+userId, Duration.ofMinutes(10));
             }
             LocalDateTime createAt = LocalDateTime.parse(time);
-            log.info("createAt {}", createAt);
+            //log.info("createAt {}", createAt);
             List<ChatMessage> messages;
             if(lastMessageId == null ||  lastSentAt == null){
                 //첫 요청 시
-                log.info("첫번째 요청");
+                //log.info("첫번째 요청");
                 messages = chatMessageRepository.findRecentMessage(roomId, createAt, size+1);
             }
             else {
-                log.info("다음 요청");
+                //log.info("다음 요청");
                 messages = chatMessageRepository.findRecentMessage(roomId, createAt, lastMessageId, lastSentAt, size + 1);
             }
 
@@ -345,7 +345,7 @@ public class ChatRoomService {
         }
     }
 
-
+    //캐싱 도입 여부 확인 필요.
     protected List<ChatRoomDto> getChatRoomsByUserId(List<ChatRoomUser> chatRoomUserList, Long userid) {
         List<ChatRoomDto> chatRooms;
         //User입장에서 ACTIVE 상태인 chatRoom만 포함되어있음
@@ -380,6 +380,7 @@ public class ChatRoomService {
                     return ChatRoomDto.builder()
                             .roomId(chatRoom.getId())
                             .userId(userid)
+                            .lastMessage(chatRoom.getLastMessage())
                             .lastMessageAt(chatRoom.getLastMessageAt())
                             .notReadCount(list.getNotReadCount())
                             .participants(otherUsers)

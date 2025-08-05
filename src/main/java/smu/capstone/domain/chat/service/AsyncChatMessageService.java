@@ -25,7 +25,6 @@ public class AsyncChatMessageService {
     private final RedisSessionManager redisSessionManager;
     private final ChatRoomUserRepository chatRoomUserRepository;
     private final ChatRoomRepository chatRoomRepository;
-    //private final UserRepository userRepository;
     private final AlarmService alarmService;
 
     @Async
@@ -83,8 +82,10 @@ public class AsyncChatMessageService {
             }
         }
 
-        //채팅방 정보 업데이트
+        //채팅방 마지막 채팅 시간 업데이트
         chatRoom.setLastMessageAt(message.getSentAt());
+        //채팅방 마지막 채팅 내용 업데이트
+        chatRoom.setLastMessage(message.getMessage());
         try {
             chatRoomRepository.save(chatRoom);
         }catch (Exception e){
