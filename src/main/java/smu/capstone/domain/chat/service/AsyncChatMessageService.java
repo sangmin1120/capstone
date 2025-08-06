@@ -24,7 +24,6 @@ public class AsyncChatMessageService {
     private final ChatMessageRepository chatMessageRepository;
     private final RedisSessionManager redisSessionManager;
     private final ChatRoomUserRepository chatRoomUserRepository;
-    private final ChatRoomRepository chatRoomRepository;
     private final AlarmService alarmService;
 
     @Async
@@ -39,13 +38,10 @@ public class AsyncChatMessageService {
     }
 
     @Async
-    /*메시지 관련 정보 비동기 업데이트 - notReadCnt, Activation 업데이트*/
+    /*메시지 관련 정보 비동기 업데이트 - Activation 업데이트*/
     public void updateChatRoomInfo(ChatMessage message) {
 
-        ChatRoom chatRoom = chatRoomRepository.findById(message.getChatRoomId()).orElseThrow(
-                () -> new ChatException(ChatExceptionCode.ROOM_NOT_EXIST));
-
-        //현재 채팅 세션에 참여인원이 1명(본인)이면 채팅방 업데이트/메시지 업데이트/알림메시지전송 진행
+        //현재 채팅 세션에 참여인원이 1명(본인)이면 채팅방 업데이트/알림메시지전송 진행
         if(redisSessionManager.isAloneInRoom(message.getChatRoomId()) ){
 
             ChatRoomUser other = chatRoomUserRepository.
@@ -59,15 +55,16 @@ public class AsyncChatMessageService {
                 throw new ChatException(ChatExceptionCode.USER_NOT_FOUND);
             }
 
-            //상대 채팅방이 비활성화 상태라면 활성화
-            if(other.getActivation().equals(ChatRoomUser.Activation.INACTIVE)){
-                other.setActivation(ChatRoomUser.Activation.ACTIVE);
-            }
-
-            other.setNotReadCount(other.getNotReadCount() + 1);
-
             try {
-                chatRoomUserRepository.save(other);
+
+                //상대 채팅방이 비활성화 상태라면 활성화
+                if(other.getActivation().equals(ChatRoomUser.Activation.INACTIVE)){
+                    other.setActivation(ChatRoomUser.Activation.ACTIVE);
+                    chatRoomUserRepository.save(other);
+                }
+
+            //other.setNotReadCount(other.getNotReadCount() + 1);
+
             }catch (Exception e) {
                 log.error("error:{}, exception: {}", e.getMessage(), e.getCause().toString(), e);
                 throw new ChatException(ChatExceptionCode.MESSAGE_SAVE_FAILED);
@@ -80,17 +77,6 @@ public class AsyncChatMessageService {
                 alarmService.sendMessage(MessageNotification.of(alramToken,
                         "새 채팅", message.getSender()+"님이 보낸 채팅입니다."));
             }
-        }
-
-        //채팅방 마지막 채팅 시간 업데이트
-        chatRoom.setLastMessageAt(message.getSentAt());
-        //채팅방 마지막 채팅 내용 업데이트
-        chatRoom.setLastMessage(message.getMessage());
-        try {
-            chatRoomRepository.save(chatRoom);
-        }catch (Exception e){
-            log.error("error:{}, exception: {}", e.getMessage(), e.getCause().toString(), e);
-            throw new ChatException(ChatExceptionCode.MESSAGE_SAVE_FAILED);
         }
     }
 }

@@ -9,6 +9,7 @@ import smu.capstone.domain.chat.domain.ChatMessage;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ChatMessageRepository extends MongoRepository<ChatMessage, String>, CustomChatMessageRepository {
@@ -26,4 +27,18 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
     @Query(value = "{ 'chatRoomId' : ?0, 'messageType' : {$in: ['FILE', 'IMAGE']} }", fields = "{'message': 1, '_id': 0 }")
     @org.springframework.data.mongodb.core.annotation.Collation(value = "ko")
     List<String> findAllFileMessagesByChatRoomId(String chatRoomId);
+
+    @org.springframework.data.mongodb.core.annotation.Collation(value = "ko")
+    Optional<ChatMessage> findFirstByChatRoomIdOrderBySentAtDesc(String chatRoomId);
+
+    //long countByChatRoomIdAndSenderNotAndSentAtAfter(String ChatRoomId, String sender, LocalDateTime sentAt);
+
+    /***
+     *
+     * @param ChatRoomId
+     * @param sentAt - 채팅방 리스트 사용 시 createAt과 lastLeaveAt 비교해 Max값을 파라미터로 입력
+     * @return long
+     */
+    @org.springframework.data.mongodb.core.annotation.Collation(value = "ko")
+    long countByChatRoomIdAndSentAtAfter(String ChatRoomId, LocalDateTime sentAt);
 }

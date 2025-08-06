@@ -19,15 +19,15 @@ import java.util.List;
 public class ChatRoom {
     @Id
     private String id;  //UUID.ramdomUUID().toString()으로 생성
-    private LocalDateTime lastMessageAt;    //해당 값을 기준으로 리스트 갱신
+    //private LocalDateTime lastMessageAt;    //해당 값을 기준으로 리스트 갱신
     private String lastMessage;             //마지막 메시지 표시
     @OneToMany(mappedBy = "chatRoom")
     private List<ChatRoomUser> chatRoomUsers;
 
     @Builder
-    private ChatRoom(String id, LocalDateTime lastMessageAt, List<ChatRoomUser> chatRoomUsers) {
+    private ChatRoom(String id, List<ChatRoomUser> chatRoomUsers) {
         this.id = id;
-        this.lastMessageAt = lastMessageAt;
+        //this.lastMessageAt = lastMessageAt;
         this.chatRoomUsers = chatRoomUsers;
     }
 }

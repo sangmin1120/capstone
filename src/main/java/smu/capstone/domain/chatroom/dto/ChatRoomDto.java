@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import smu.capstone.domain.chat.domain.ChatMessage;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,8 +18,9 @@ import java.util.List;
 @Builder
 public class ChatRoomDto {
     private String roomId;                      //RoomId
-    private LocalDateTime lastMessageAt;        //해당 값을 기준으로 리스트 갱신
+    //private LocalDateTime lastMessageAt;        //해당 값을 기준으로 리스트 갱신
     private Long userId;
-    private int notReadCount;                   //해당 user가 안 읽은 메시지 수(상대 user X)
+    private Long notReadCount;                   //해당 user가 안 읽은 메시지 수(상대 user X)
+    private ChatMessage lastMsg;
     private List<RoomParticipantDto> participants; //같은 방에 참가하는 다른 USER
 }

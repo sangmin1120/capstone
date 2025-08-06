@@ -32,7 +32,7 @@ public class ChatReadPublisher {
             log.error("메시지 잘못 발신: READ TYPE이어야 하지만 {} TYPE 입니다.", chatMessageDto.getMessageType());
             throw new ChatException(ChatExceptionCode.INVALID_MESSAGE_TYPE);
         }
-
+        /*
         //내가 안 읽은 메시지 Count를 0으로 변경 후 DB 업데이트
         UserEntity user = userRepository.findByAccountId(chatMessageDto.getSender()).orElseThrow(
                 () -> new ChatException(ChatExceptionCode.USER_NOT_FOUND)
@@ -46,6 +46,7 @@ public class ChatReadPublisher {
 
         //상대에게 읽었음을 알림 - 프론트에서 해당 메시지를 읽고 읽음 처리(=1을 UI에서 지움)
         // (웹소켓이므로 반영한 DB를 프론트에게 다시 뿌리기 힘듦, 서버는 DB만 반영하고 읽음 처리는 UI에서 처리)
+         */
         try {
             redisTemplate.convertAndSend(channelTopic.getTopic(), chatMessageDto);
         }catch (RedisException e) {

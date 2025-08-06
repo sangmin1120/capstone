@@ -9,5 +9,5 @@ import lombok.*;
 public class ChatRoomEnterDto {
     private String userId;
     private RoomParticipantDto participant;
-    private int otherUserUnreadCount;
+    private Long otherUserUnreadCount;
 }

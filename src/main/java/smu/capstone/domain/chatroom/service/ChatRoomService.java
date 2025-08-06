@@ -1,5 +1,6 @@
 package smu.capstone.domain.chatroom.service;
 
+import jakarta.validation.constraints.Max;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -79,16 +80,16 @@ public class ChatRoomService {
         RoomParticipantDto participant = getParticipateInfo(pair.getOtherChatRoomUser());
 
         //User가 나가고 다시 들어왔을 때 메시지가 없음에도 상대의 안 읽은 cnt 값이 남아있으므로 보정해줘야 함
-        int cnt = 0;
-        if(pair.getChatRoomUser().getCreatedAt().isBefore(chatRoom.getLastMessageAt())){
-            cnt = pair.getOtherChatRoomUser().getNotReadCount();
-        }
+//        int cnt = 0;
+//        if(pair.getChatRoomUser().getCreatedAt().isBefore(chatRoom.getLastMessageAt())){
+//            cnt = pair.getOtherChatRoomUser().getNotReadCount();
+//        }
 
         return ChatRoomEnterDto.builder()
                 .userId(pair.getChatRoomUser().getUserEntity().getAccountId()) // entitiy의 id가 아닌 accountId가 사용됨
                 .participant(participant)
                 //다른 사람의 안 읽은 메시지수 가져옴
-                .otherUserUnreadCount(cnt)
+                .otherUserUnreadCount(chatMessageRepository.countByChatRoomIdAndSentAtAfter(roomId, pair.getOtherChatRoomUser().getLastLeaveAt()))
                 .build();
     }
 
@@ -230,7 +231,7 @@ public class ChatRoomService {
             if (!chatRoomUser.isOpponentDeleted()) {
                 chatRoomUser.setActivation(ChatRoomUser.Activation.INACTIVE);
                 chatRoomUser.setCreatedAt(LocalDateTime.now());
-                chatRoomUser.setNotReadCount(0);
+                //chatRoomUser.setNotReadCount(0);
                 chatRoomUserRepository.save(chatRoomUser);
                 return;
             }
@@ -320,7 +321,7 @@ public class ChatRoomService {
             //생성 시간으로 설정
             ChatRoom chatRoom = ChatRoom.builder()
                     .id(UUID.randomUUID().toString())
-                    .lastMessageAt(LocalDateTime.now())
+                    //.lastMessageAt(LocalDateTime.now())
                     .build();
 
             //ChatRoomUser 중간 테이블 생성
@@ -353,6 +354,8 @@ public class ChatRoomService {
                 .map(
                 list -> {
                     ChatRoom chatRoom = list.getChatRoom();
+                    LocalDateTime lastLeaveAt = list.getLastLeaveAt();
+                    LocalDateTime createdAt = list.getCreatedAt();
                     List<RoomParticipantDto> otherUsers = chatRoom.getChatRoomUsers().stream()
                             .filter( cru -> !userid.equals(cru.getUserEntity().getId()))
                             .map(other -> ChatRoomUser.Activation.UNAVAILABLE.equals(other.getActivation())
@@ -380,14 +383,23 @@ public class ChatRoomService {
                     return ChatRoomDto.builder()
                             .roomId(chatRoom.getId())
                             .userId(userid)
-                            .lastMessage(chatRoom.getLastMessage())
-                            .lastMessageAt(chatRoom.getLastMessageAt())
-                            .notReadCount(list.getNotReadCount())
+                            .lastMsg(chatMessageRepository.findFirstByChatRoomIdOrderBySentAtDesc(chatRoom.getId()).orElse(null))
+                            //안 읽은 수 보정
+                            .notReadCount( (redisTemplete.opsForHash().size(chatRoom.getId()) == 1) ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(chatRoom.getId(), max(lastLeaveAt, createdAt)))
                             .participants(otherUsers)
                             .build();
-                }).sorted(
-                (o1, o2) -> o2.getLastMessageAt().compareTo(o1.getLastMessageAt()
+                }).sorted(Comparator.comparing(
+                        (ChatRoomDto roomDto) -> {
+                            ChatMessage lastMsg = roomDto.getLastMsg();
+                            return lastMsg != null ? lastMsg.getSentAt() : null;
+                        },
+                        Comparator.nullsFirst(Comparator.reverseOrder())
+//                (o1, o2) -> o2.getLastMsg().getSentAt().compareTo(o1.getLastMsg().getSentAt()
                 )).collect(Collectors.toList());
         return chatRooms;
+    }
+
+    protected LocalDateTime max(LocalDateTime a, LocalDateTime b) {
+            return a.isAfter(b) ? a : b;
     }
 }

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,8 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collation = "chat_messages")
+@Document(collection = "chat_messages")
+@CompoundIndex(name = "chatRoomId_sentAt", def = "{'chatRoomId': 1, 'sentAt': -1}")
 public class ChatMessage {
     @Id
     private String id;

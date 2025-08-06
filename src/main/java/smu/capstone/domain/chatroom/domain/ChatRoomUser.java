@@ -19,8 +19,9 @@ public class ChatRoomUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;    //해당 값은 Long으로 설정
 
-    private int notReadCount;           //해당 user가 안 읽은 메시지 수(상대 user X)
+    //private int notReadCount;           //해당 user가 안 읽은 메시지 수(상대 user X)
     private LocalDateTime createdAt;    //chatRoom 생성 날짜
+    private LocalDateTime lastLeaveAt;
     @Enumerated(EnumType.STRING)
     private Activation activation;
     private boolean isOpponentDeleted;  //Id 재활용 시 채팅방 접근 제어 위해 사용
@@ -33,14 +34,16 @@ public class ChatRoomUser {
     @JoinColumn(name = "chat_room_id")
     private ChatRoom chatRoom;
 
+//    private LocalDateTime lastEnterAt;
     public enum Activation{
         ACTIVE, INACTIVE, UNAVAILABLE      //활성화, 비활성화, 접근불가(탈퇴, 두 사용자 모두 삭제)로 구분
     }
 
     @Builder
     ChatRoomUser(UserEntity userEntity, ChatRoom chatRoom) {
-        this.notReadCount = 0;
+        //this.notReadCount = 0;
         this.createdAt = LocalDateTime.now();
+        this.lastLeaveAt = LocalDateTime.now();
         this.activation = Activation.ACTIVE;
         this.isOpponentDeleted = false;
         this.userEntity = userEntity;
