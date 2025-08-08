@@ -21,6 +21,7 @@ import smu.capstone.domain.chatroom.repository.ChatRoomRepository;
 import smu.capstone.domain.chatroom.repository.ChatRoomUserRepository;
 import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.respository.UserRepository;
+import smu.capstone.intrastructure.chatting.util.RedisSessionManager;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -40,25 +41,32 @@ public class ChatRoomService {
     private final ChatMessageRepository chatMessageRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher publisher;
-    private final RedisTemplate<String, String> redisTemplete;
+    private final RedisTemplate<String, String> redisTemplete;  //캐싱 목적
+    private final RedisSessionManager redisSessionManager;
 
     private static final String TIME_CACHE_KEY = "createAtCache";
 
     public List<ChatRoomDto> getChatRoomList() {
         //중복 - board 서비스와 반환값은 같은데 다른 함수를 사용 - ?
         Long userId = getLoginMemberId();
+
+        String accountId = userRepository.findById(userId).orElseThrow(
+                () -> new RestApiException(CommonStatusCode.NOT_FOUND_USER)
+        ).getAccountId();
+
         if(userId == null) {
             throw new ChatRoomException(ChatRoomExceptionCode.NOT_FOUND_USER);
         }
 
         List<ChatRoomUser> chatRoomUserList = chatRoomUserRepository.findByUserEntity_Id(userId);
+
         for(ChatRoomUser cru : chatRoomUserList ) {
             log.info("ID: {}",cru.getUserEntity().getAccountId());
             log.info("roomId: {} ", cru.getChatRoom().getId());
             log.info("activation: {}", cru.getActivation().toString());
         }
         try {
-            return getChatRoomsByUserId(chatRoomUserList, userId);
+            return getChatRoomsByUserId(chatRoomUserList, userId, accountId);
         }catch (Exception e) {
             log.error(e.getMessage());
             throw new ChatRoomException(CommonStatusCode.INTERNAL_SERVER_ERROR);
@@ -84,12 +92,12 @@ public class ChatRoomService {
 //        if(pair.getChatRoomUser().getCreatedAt().isBefore(chatRoom.getLastMessageAt())){
 //            cnt = pair.getOtherChatRoomUser().getNotReadCount();
 //        }
-
+        String otherUserId = pair.getChatRoomUser().getUserEntity().getAccountId();
         return ChatRoomEnterDto.builder()
-                .userId(pair.getChatRoomUser().getUserEntity().getAccountId()) // entitiy의 id가 아닌 accountId가 사용됨
+                .userId(otherUserId) // entitiy의 id가 아닌 accountId가 사용됨
                 .participant(participant)
-                //다른 사람의 안 읽은 메시지수 가져옴
-                .otherUserUnreadCount(chatMessageRepository.countByChatRoomIdAndSentAtAfter(roomId, pair.getOtherChatRoomUser().getLastLeaveAt()))
+                //다른 사람의 안 읽은 메시지수 가져옴 - 이미 채팅방에 있을 경우 0으로 보정
+                .otherUserUnreadCount(redisSessionManager.hasUserSession(roomId, otherUserId) ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(roomId, pair.getOtherChatRoomUser().getLastLeaveAt()))
                 .build();
     }
 
@@ -347,7 +355,7 @@ public class ChatRoomService {
     }
 
     //캐싱 도입 여부 확인 필요.
-    protected List<ChatRoomDto> getChatRoomsByUserId(List<ChatRoomUser> chatRoomUserList, Long userid) {
+    protected List<ChatRoomDto> getChatRoomsByUserId(List<ChatRoomUser> chatRoomUserList, Long userid, String accountId) {
         List<ChatRoomDto> chatRooms;
         //User입장에서 ACTIVE 상태인 chatRoom만 포함되어있음
         chatRooms = chatRoomUserList.stream()
@@ -385,7 +393,7 @@ public class ChatRoomService {
                             .userId(userid)
                             .lastMsg(chatMessageRepository.findFirstByChatRoomIdOrderBySentAtDesc(chatRoom.getId()).orElse(null))
                             //안 읽은 수 보정
-                            .notReadCount( (redisTemplete.opsForHash().size(chatRoom.getId()) == 1) ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(chatRoom.getId(), max(lastLeaveAt, createdAt)))
+                            .notReadCount( redisSessionManager.hasUserSession(chatRoom.getId(), accountId) ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(chatRoom.getId(), max(lastLeaveAt, createdAt)))
                             .participants(otherUsers)
                             .build();
                 }).sorted(Comparator.comparing(
