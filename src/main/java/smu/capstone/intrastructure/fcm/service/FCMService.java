@@ -1,6 +1,9 @@
 package smu.capstone.intrastructure.fcm.service;
 
 
+import com.google.api.core.ApiFuture;
+import com.google.api.core.ApiFutureCallback;
+import com.google.api.core.ApiFutures;
 import com.google.firebase.messaging.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +14,7 @@ import smu.capstone.intrastructure.fcm.dto.MessageNotification;
 import smu.capstone.intrastructure.fcm.dto.NotificationMulticastRequest;
 import smu.capstone.intrastructure.fcm.dto.NotificationRequest;
 
-import java.util.concurrent.Future;
+import java.util.function.Consumer;
 
 import static smu.capstone.common.errorcode.FcmExceptionCode.FCM_SERVICE_UNAVAILABLE;
 
@@ -40,7 +43,9 @@ public class FCMService {
 //                    .setWebpushConfig(getWebpushConfig(request)) // 웹 푸시용 추가
                     .build();
             //Future로 잡아서 FirebaseException 중 token 만료 핸들링 필요
-            firebaseMessaging.sendAsync(message);
+            ApiFuture<String> future = firebaseMessaging.sendAsync(message);
+            addCallback(future,  res -> {},
+                    t -> log.error("[FCM] Cause: {}, Message: {}", t.getCause(), t.getMessage()));
         }catch (RuntimeException exception) {
             log.error("[FCM] 예외 발생: {}", exception.getMessage());
             throw new RestApiException(FCM_SERVICE_UNAVAILABLE);
@@ -60,8 +65,9 @@ public class FCMService {
             MulticastMessage messages = request.buildSendMessage()
                     .setApnsConfig(getApnsConfig(request))
                     .build();
-            firebaseMessaging.sendEachForMulticastAsync(messages);
-
+            ApiFuture<BatchResponse> future = firebaseMessaging.sendEachForMulticastAsync(messages);
+            addCallback(future,  res -> log.info("[FCM]: 전송 성공 Number:{}, Response:{}", res.getSuccessCount(), res.getResponses()),
+                    t -> log.error("[FCM] Cause: {}, Message: {}", t.getCause(), t.getMessage()));
         } catch (RuntimeException exception) {
             log.error("[FCM] 예외 발생: {}", exception.getMessage());
             throw new RestApiException(FCM_SERVICE_UNAVAILABLE);
@@ -99,5 +105,21 @@ public class FCMService {
                                 .setClickAction("push_click")
                                 .build()
                 ).build();
+    }
+
+    //TODO: CompletableFuture 지원 시 변환 필요
+    private <T> void addCallback(ApiFuture<T> future, Consumer<T> onSuccess, Consumer<Throwable> onFailure) {
+        ApiFutures.addCallback(future, new ApiFutureCallback<T>() {
+
+            @Override
+            public void onFailure(Throwable throwable) {
+                onFailure.accept(throwable);
+            }
+
+            @Override
+            public void onSuccess(T t) {
+                onSuccess.accept(t);
+            }
+        });
     }
 }
