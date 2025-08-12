@@ -23,8 +23,6 @@ public class ChatReadPublisher {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final ChannelTopic channelTopic;
-    private final ChatRoomUserRepository chatRoomUserRepository;
-    private final UserRepository userRepository;
 
     public void sendReadState(ChatMessageDto chatMessageDto){
         //에러 던지기

@@ -93,11 +93,14 @@ public class ChatRoomService {
 //            cnt = pair.getOtherChatRoomUser().getNotReadCount();
 //        }
         String otherUserId = pair.getChatRoomUser().getUserEntity().getAccountId();
+        boolean isOtherOnline = redisSessionManager.hasUserSession(roomId, otherUserId);
         return ChatRoomEnterDto.builder()
                 .userId(otherUserId) // entitiy의 id가 아닌 accountId가 사용됨
                 .participant(participant)
                 //다른 사람의 안 읽은 메시지수 가져옴 - 이미 채팅방에 있을 경우 0으로 보정
-                .otherUserUnreadCount(redisSessionManager.hasUserSession(roomId, otherUserId) ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(roomId, pair.getOtherChatRoomUser().getLastLeaveAt()))
+                .otherUserUnreadCount(isOtherOnline ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(roomId
+                        , max(pair.getOtherChatRoomUser().getLastLeaveAt(), pair.getChatRoomUser().getCreatedAt())))
+                .isOtherOnline(isOtherOnline)
                 .build();
     }
 
@@ -391,14 +394,14 @@ public class ChatRoomService {
                     return ChatRoomDto.builder()
                             .roomId(chatRoom.getId())
                             .userId(userid)
-                            .lastMsg(chatMessageRepository.findFirstByChatRoomIdOrderBySentAtDesc(chatRoom.getId()).orElse(null))
+                            .lastMessage(chatMessageRepository.findFirstByChatRoomIdOrderBySentAtDesc(chatRoom.getId()).orElse(null))
                             //안 읽은 수 보정
                             .notReadCount( redisSessionManager.hasUserSession(chatRoom.getId(), accountId) ? 0 : chatMessageRepository.countByChatRoomIdAndSentAtAfter(chatRoom.getId(), max(lastLeaveAt, createdAt)))
                             .participants(otherUsers)
                             .build();
                 }).sorted(Comparator.comparing(
                         (ChatRoomDto roomDto) -> {
-                            ChatMessage lastMsg = roomDto.getLastMsg();
+                            ChatMessage lastMsg = roomDto.getLastMessage();
                             return lastMsg != null ? lastMsg.getSentAt() : null;
                         },
                         Comparator.nullsFirst(Comparator.reverseOrder())
