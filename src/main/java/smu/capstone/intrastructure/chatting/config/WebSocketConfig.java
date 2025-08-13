@@ -2,6 +2,7 @@ package smu.capstone.intrastructure.chatting.config;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -25,8 +26,10 @@ import smu.capstone.intrastructure.chatting.util.SessionManager;
 @EnableWebSocketMessageBroker   //웹소켓 활성화
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    private final static long STOMP_HEARTBEAT_TO_CLIENT = 10000;   //서버가 보내는 pong: 10초 체크
-    private final static long STOMP_HEARTBEAT_FROM_CLIENT = 60000; //클라이언트가 보내는 ping: 60초 체크
+    private static final long STOMP_HEARTBEAT_TO_CLIENT = 10000;   //서버가 보내는 pong: 10초 체크
+    private static final long STOMP_HEARTBEAT_FROM_CLIENT = 60000; //클라이언트가 보내는 ping: 60초 체크
+    @Value("${spring.domain}")
+    private String domain;
 
     private final SessionManager sessionManager;
     private final StompHandler stompHandler;
@@ -35,8 +38,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-chat")
-                .setAllowedOriginPatterns("http://localhost:3000") // CORS 문제 해결
-        ;//.withSockJS();
+                .setAllowedOriginPatterns("http://localhost:3000",            // 로컬 React 등 개발서버
+                                            domain);                          //도메인 적용
+//                  .setAllowedOriginPatterns("*"); // CORS 문제 해결
+               // .withSockJS();
         registry.setErrorHandler(stompErrorHander);
     }
 

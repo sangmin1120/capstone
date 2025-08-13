@@ -21,6 +21,7 @@ public class BoardResponseDto {
     private String imgUrl;
     private int likeCount;
     private Long price;
+    private String profileUrl;
 
     public BoardResponseDto(Board board) {
         this.boardId = board.getId();
@@ -32,9 +33,10 @@ public class BoardResponseDto {
         UserEntity user = board.getUser();
         this.username = user.getUsername();
         this.email = user.getEmail();
-        this.imgUrl= board.getImgUrl();
-        this.likeCount=board.getLikeCount();
-        this.price=board.getPrice();
+        this.imgUrl = board.getImgUrl();
+        this.likeCount = board.getLikeCount();
+        this.price = board.getPrice();
+        this.profileUrl = user.getImgUrl();
     }
 }
 

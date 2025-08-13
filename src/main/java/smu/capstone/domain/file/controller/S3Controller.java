@@ -34,19 +34,19 @@ public class S3Controller {
         return BaseResponse.ok(s3Service.createUploadChatPresignedUrl(filename, roomId));
     }
 
-    //파일 접근 api
-    @GetMapping("/get-url")
-    public BaseResponse<String> getPresignedUrl(@RequestParam String fileKey) {
-        String url = s3Service.createGetUrl(fileKey);
-        return BaseResponse.ok(url);
-    }
-
-    //파일 다운로드 api(header 오버라이드)
-    @GetMapping("/download-url")
-    public BaseResponse<String> getPresignedDownloadUrl(@RequestParam String fileKey){
-        String url = s3Service.createDownloadUrl(fileKey);
-        return BaseResponse.ok(url);
-    }
+//    //파일 접근 api
+//    @GetMapping("/get-url")
+//    public BaseResponse<String> getPresignedUrl(@RequestParam String fileKey) {
+//        String url = s3Service.createGetUrl(fileKey);
+//        return BaseResponse.ok(url);
+//    }
+//
+//    //파일 다운로드 api(header 오버라이드)
+//    @GetMapping("/download-url")
+//    public BaseResponse<String> getPresignedDownloadUrl(@RequestParam String fileKey){
+//        String url = s3Service.createDownloadUrl(fileKey);
+//        return BaseResponse.ok(url);
+//    }
 
     //TODO: 다운로드 말고 그냥 얻는 것도 만들기
     @GetMapping("/download-signedurl")

@@ -96,12 +96,14 @@ public class AuthRequestDto {
         String phoneNumber; // 010-1111-1111
         String birth; // 생년월일 year.month.day
         UserType userType;
+        String imgUrl;
 
         public UserInfo toInfo(UserEntity userEntity) {
             return UserInfo.builder()
                     .accountId(userEntity.getAccountId())
                     .email(userEntity.getEmail())
                     .username(userEntity.getUsername())
+                    .imgUrl(userEntity.getImgUrl())
                     .phoneNumber(userEntity.getPhoneNumber())
                     .birth(userEntity.getBirth())
                     .userType(userEntity.getUserType())

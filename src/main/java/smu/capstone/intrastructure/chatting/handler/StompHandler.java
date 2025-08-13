@@ -28,6 +28,7 @@ import smu.capstone.intrastructure.jwt.service.TokenProvider;
 import smu.capstone.intrastructure.jwt.service.TokenService;
 
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -45,7 +46,7 @@ public class StompHandler implements ChannelInterceptor {
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor
                 .getAccessor(message, StompHeaderAccessor.class);
-        if(StompCommand.CONNECT.equals(accessor.getCommand())) {
+        if(StompCommand.CONNECT.equals(Objects.requireNonNull(accessor).getCommand())) {
 
             String authHeader = accessor.getFirstNativeHeader("Authorization");
             String roomId = accessor.getFirstNativeHeader("RoomId");
@@ -70,7 +71,7 @@ public class StompHandler implements ChannelInterceptor {
             //SecurityContextHolder.getContext().setAuthentication(auth);
             accessor.setUser(auth);
 
-            String username = accessor.getUser().getName();
+            String username = Objects.requireNonNull(accessor.getUser()).getName();
 
             //상대 유저가 탈퇴한 사용자일 경우 채팅창 비활성화
             ChatRoomUser user = chatRoomUserRepository.findByChatRoom_IdAndUserEntity_AccountId(roomId, username).orElseThrow(
@@ -101,18 +102,9 @@ public class StompHandler implements ChannelInterceptor {
             redisSessionManager.putChatUserSession(roomId, username, accessor.getSessionId());
             log.info("현재 세션 {}", accessor.getSessionId());
         }
-//        else if (StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
-//            String roomId = extractRoomIdFromDestination(accessor.getDestination());
-//            //맞는지 검증
-//            if(roomId != null) {
-//                if(!chatRoomUserRepository.existsByChatRoom_IdAndUserEntity_accountId(roomId,accessor.getUser().getName())){
-//                    throw new RestApiException(CommonStatusCode.FORBIDDEN);
-//                }
-//            }
-//        }
         return message;
     }
-    //"" 일 때 에러처리 필요 try로 잡을 것 이제보니 jwt 파싱 오류엿네 ㄷㄷ; try로 restapi 잡고 가기 room은 401 던져서 ㄱㅊ
+
     private String extractRoomIdFromDestination(String destination) {
         if(destination != null) {
             String[] parts = destination.split("/");

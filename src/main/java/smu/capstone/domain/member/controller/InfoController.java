@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import smu.capstone.common.response.BaseResponse;
+import smu.capstone.domain.file.dto.UrlResponseDto;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.service.InfoService;
 
@@ -42,16 +43,15 @@ public class InfoController {
     }
 
     @PostMapping("/upload-profileImg")
-    public BaseResponse<Map<String,String>> uploadProfile(@RequestBody AuthRequestDto.ProfileFile profileFile) {
-        Map<String, String> profileFileMap = infoService.uploadProfileFile(profileFile);
-
-        return BaseResponse.ok(profileFileMap); // signedUrl, key 반환
+    public BaseResponse<UrlResponseDto> uploadProfile(@RequestBody AuthRequestDto.ProfileFile profileFile) {
+        UrlResponseDto urlResponse = infoService.uploadProfileFile(profileFile);
+        return BaseResponse.ok(urlResponse); // signedUrl, accessUrl, key 반환
     }
 
-    @GetMapping("/get-profileImg")
-    public BaseResponse<String> getProfileImg() {
-        String profileImgUrl = infoService.getProfileImg();
-
-        return BaseResponse.ok(profileImgUrl); // signedUrl 반환
-    }
+//    @GetMapping("/get-profileImg")
+//    public BaseResponse<String> getProfileImg() {
+//        String profileImgUrl = infoService.getProfileImg();
+//
+//        return BaseResponse.ok(profileImgUrl); // signedUrl 반환
+//    }
 }

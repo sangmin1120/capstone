@@ -61,7 +61,7 @@ public class S3Service {
 
     public String createDownloadUrl(String key){
         if(key == null){
-            throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+            return null;
         }
         try {
             return s3Util.createDownloadPresignedUrl(key);
@@ -73,7 +73,7 @@ public class S3Service {
 
     public String createGetUrl(String key){
         if(key == null){
-            throw new RestApiException(CommonStatusCode.INVALID_PARAMETER);
+            return null;
         }
         if(!validationImgFile(key)){
             log.error("file error: 이미지만 가능 {}", key);

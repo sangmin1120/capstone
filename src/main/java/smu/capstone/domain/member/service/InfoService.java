@@ -3,6 +3,7 @@ package smu.capstone.domain.member.service;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +14,7 @@ import smu.capstone.domain.member.entity.UserEntity;
 import smu.capstone.domain.member.dto.AuthRequestDto;
 import smu.capstone.domain.member.respository.UserRepository;
 import smu.capstone.domain.member.util.LoginUserUtil;
+import smu.capstone.domain.member.util.UserDeleteEvent;
 import smu.capstone.intrastructure.jwt.service.TokenProvider;
 import smu.capstone.intrastructure.jwt.service.TokenService;
 
@@ -31,6 +33,9 @@ public class InfoService {
     private final TokenService tokenService;
     private final TokenProvider tokenProvider;
     private final S3Service s3Service;
+
+    private final ApplicationEventPublisher publisher;
+
 
     // 비밀번호 변경
     @Transactional
@@ -53,44 +58,41 @@ public class InfoService {
     }
 
     // 회원 탈퇴
+    @Transactional
     public void delete(HttpServletRequest request) {
         UserEntity user = getCurrentUser();
 
         // entity isDelete 값을 true 로 변경 -> 실제 DB 삭제는 안함
         user.withdraw();
         userRepository.save(user);
+        //이벤트 발행
+        publisher.publishEvent(new UserDeleteEvent(user.getId()));
         // 토큰값 블랙리스트
         tokenService.blacklistAccessToken(tokenProvider.getAccessToken(request));
     }
 
-    public Map<String,String> uploadProfileFile(AuthRequestDto.ProfileFile profileFile) {
-
-        // 1. preSignedUrl 가져오기
+    public UrlResponseDto uploadProfileFile(AuthRequestDto.ProfileFile profileFile) {
         UrlResponseDto urlResponseDto
                 = s3Service.createUploadPresignedUrl(profileFile.getPrefix(), profileFile.getFilename());
-
-        Map<String, String> profileFileMap = new HashMap<>();
-        profileFileMap.put("fileUrl", urlResponseDto.getPresignedUrl());
-        profileFileMap.put("fileKey", urlResponseDto.getKey());
-
-        // 2. 백엔드에 저장
+        //백엔드에 저장
         UserEntity user = getCurrentUser();
-        user.setImgUrl(profileFileMap.get("fileKey")); // 백엔드에는 key 만 저장
+        user.setImgUrl(urlResponseDto.getAccessUrl()); // 백엔드에는 url만 저장
         userRepository.save(user);
 
-        log.info("[infoService] fileKey: {}, fileUrl: {}", profileFileMap.get("fileKey"), profileFileMap.get("fileUrl"));
+        log.info("[infoService] fileKey: {}, fileUrl: {}", urlResponseDto.getKey(),urlResponseDto.getAccessUrl());
 
-        return profileFileMap;
+        return urlResponseDto;
     }
 
-    public String getProfileImg() {
-
-        // fileKey -> preSignedUrl
-        UserEntity user = getCurrentUser();
-        String profileImgUrl = s3Service.createGetUrl(user.getImgUrl());
-
-        log.info("[infoService] ImgUrl: {}", profileImgUrl);
-
-        return profileImgUrl;
-    }
+//필요없음
+//    public String getProfileImg() {
+//
+//        // fileKey -> preSignedUrl
+//        UserEntity user = getCurrentUser();
+//        String profileImgUrl = s3Service.createGetUrl(user.getImgUrl());
+//
+//        log.info("[infoService] ImgUrl: {}", profileImgUrl);
+//
+//        return profileImgUrl;
+//    }
 }

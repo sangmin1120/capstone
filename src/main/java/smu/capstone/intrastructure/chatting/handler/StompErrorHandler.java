@@ -40,6 +40,7 @@ public class StompErrorHandler extends StompSubProtocolErrorHandler {
                 return sendErrorMessage(cause, ((ChatRoomException) cause).getStatusCode());
             }
         }
+        log.info("Stomp Error: {} {} {}", ex.getMessage(), clientMessage.getPayload(), ex.getStackTrace()[0]);
         return super.handleClientMessageProcessingError(clientMessage, ex);
     }
 
