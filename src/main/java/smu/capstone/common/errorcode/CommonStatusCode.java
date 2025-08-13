@@ -20,13 +20,20 @@ public enum CommonStatusCode implements StatusCode{
     NOT_FOUND_IMG(HttpStatus.BAD_REQUEST, "S404-3","이미지가 존재하지 않습니다."),
 
     NOT_FOUND_BOARD_TYPE(HttpStatus.NOT_FOUND,"C404-1","BoardType 존재하지 않습니다."),
+    INVALID_BOARD_TYPE(HttpStatus.BAD_REQUEST, "C400-5", "유효하지 않은 게시판 타입입니다."),
     NOT_FOUND_BOARD_ID(HttpStatus.NOT_FOUND,"C404-2","게시글이 존재하지 않습니다."),
     NOT_FOUND_USER(HttpStatus.NOT_FOUND, "C404-3","사용자가 존재하지 않습니다."),
     NOT_FOUND_EXERCISE_DIARY(HttpStatus.NOT_FOUND, "C404-4","운동 기록을 찾을 수 없습니다."),
 
     VALIDATION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "C422-1", "유효성 검증에 실패하였습니다."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C500-1", "서버 내부 에러입니다."),
+
+    CANNOT_REPORT_YOURSELF(HttpStatus.BAD_REQUEST, "C400-2", "자기 자신을 신고할 수 없습니다."),
+    DUPLICATE_REPORT(HttpStatus.BAD_REQUEST, "C400-3", "이미 신고한 콘텐츠입니다."),
+    NOT_FOUND_COMMENT(HttpStatus.NOT_FOUND, "C404-5", "댓글이 존재하지 않습니다."),
+    INVALID_CONTENT_TYPE(HttpStatus.BAD_REQUEST, "C400-4", "유효하지 않은 콘텐츠 타입입니다."),
     ;
+
 
     private final HttpStatus status;
     private final String code;
