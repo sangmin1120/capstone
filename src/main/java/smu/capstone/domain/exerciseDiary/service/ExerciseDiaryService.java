@@ -39,6 +39,10 @@ public class ExerciseDiaryService {
                 .reps(requestDto.getReps())
                 .build();
 
+        if (requestDto.getCreatedAt() != null) {
+            diary.setCreatedAt(requestDto.getCreatedAt());
+        }
+
         return new ExerciseDiaryResponseDto(exerciseDiaryRepository.save(diary));
     }
 

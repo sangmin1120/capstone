@@ -12,7 +12,7 @@ public class CorsMvcConfig_dev implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost")
+                .allowedOrigins("http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")  // 필요한 메서드 허용
                 .allowedHeaders("*")
                 .allowCredentials(true);
